@@ -5,6 +5,8 @@ import 'react-phone-number-input/style.css';
 import { SERVICES, OPENING_HOUR, LAST_SLOT_START } from '../data/services';
 import { getAvailability, createBooking } from '../api/n8n';
 
+const MAQUILLAJE_PRICE = 80000;
+
 function formatPrice(price) {
   return new Intl.NumberFormat('es-CO', {
     style: 'currency',
@@ -48,6 +50,59 @@ function toEventISO(date, time, durationMinutes) {
   return { startISO: fmt(start), endISO: fmt(end) };
 }
 
+function toGoogleCalendarDate(isoStr) {
+  // "2025-07-15T14:00:00-05:00" -> "20250715T190000Z" (UTC)
+  const d = new Date(isoStr);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+}
+
+function buildGoogleCalendarUrl(booking) {
+  const dates = `${toGoogleCalendarDate(booking.startISO)}/${toGoogleCalendarDate(booking.endISO)}`;
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: `Cita - ${booking.servicio} | Daniela Tapias Studio`,
+    dates,
+    details: `Servicio: ${booking.servicio}\nTotal aprox.: ${formatPrice(booking.precio)}${booking.requiereMaquillaje ? '\nIncluye maquillaje' : ''}${booking.notas && booking.notas !== 'Sin notas adicionales' ? `\nNotas: ${booking.notas}` : ''}`,
+    location: 'Daniela Tapias Studio'
+  });
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function buildICSContent(booking) {
+  const dtStart = toGoogleCalendarDate(booking.startISO);
+  const dtEnd = toGoogleCalendarDate(booking.endISO);
+  const now = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Daniela Tapias Studio//ES',
+    'BEGIN:VEVENT',
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `DTSTAMP:${now}`,
+    `UID:${Date.now()}@danielatapias.studio`,
+    `SUMMARY:Cita - ${booking.servicio} | Daniela Tapias Studio`,
+    `DESCRIPTION:Servicio: ${booking.servicio}\\nTotal aprox.: ${formatPrice(booking.precio)}${booking.requiereMaquillaje ? '\\nIncluye maquillaje' : ''}`,
+    'LOCATION:Daniela Tapias Studio',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+}
+
+function downloadICS(booking) {
+  const content = buildICSContent(booking);
+  const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cita-daniela-tapias.ics';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 const initialForm = {
   serviceId: '',
   name: '',
@@ -71,6 +126,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
   const [slotsError, setSlotsError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+  const [confirmedBooking, setConfirmedBooking] = useState(null);
   const [touched, setTouched] = useState({});
   const previousDateRef = useRef('');
 
@@ -150,7 +206,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
     if (!form.phone || !isValidPhoneNumber(form.phone)) {
       newErrors.phone = 'Ingresa un número de WhatsApp válido';
     }
-    if (!form.email || !emailRegex.test(form.email)) {
+    if (form.email && !emailRegex.test(form.email)) {
       newErrors.email = 'Ingresa un email válido';
     }
     if (!form.date) newErrors.date = 'Selecciona una fecha';
@@ -168,7 +224,6 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
       serviceId: true,
       name: true,
       phone: true,
-      email: true,
       date: true,
       time: true
     });
@@ -189,7 +244,8 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
     try {
       const selectedService = SERVICES.find((s) => s.id === form.serviceId);
-      const totalPrice = selectedService.price;
+      const maquillajeCost = form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
+      const totalPrice = selectedService.price + maquillajeCost;
       const { startISO, endISO } = toEventISO(form.date, form.time, selectedService.duration);
 
       const bookingPayload = {
@@ -197,21 +253,25 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
         precio: totalPrice,
         nombre_completo: form.name.trim(),
         whatsapp: form.phone ? form.phone.replace(/[^0-9]/g, '') : '',
-        email: form.email.trim(),
+        email: form.email.trim() || 'sinCorreo@ejemplo.com',
         a_domicilio: form.domicilio,
         detalles_domicilio: form.domicilio ? form.domicilioDetalles.trim() : 'NA',
         requiere_maquillaje: form.requiereMaquillaje,
-        notas: form.notes.trim(),
+        notas: form.notes.trim() || 'Sin notas adicionales',
         fecha_inicio: startISO,
         fecha_fin: endISO
       };
 
       const result = await createBooking(bookingPayload);
 
-      setMessage({
-        type: 'success',
-        text: `✅ ¡Cita agendada con éxito! ${result.summary ? 'Te enviamos la confirmación a tu email.' : ''}`
+      setConfirmedBooking({
+        ...bookingPayload,
+        startISO,
+        endISO,
+        serviceName: selectedService.name
       });
+
+      setMessage({ type: 'success' });
 
       // Reset form
       setForm(initialForm);
@@ -356,7 +416,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 									</div>
 
 								<div className="field">
-									<label htmlFor="email">Email *</label>
+									<label htmlFor="email">Email (opcional)</label>
 									<input
 										id="email"
 										name="email"
@@ -532,12 +592,12 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 									{form.requiereMaquillaje && (
 										<div className="summary-row">
 											<span className="label">Maquillaje</span>
-											<span>Sí</span>
+											<span>{formatPrice(MAQUILLAJE_PRICE)}</span>
 										</div>
 									)}
 									<div className="summary-row total">
 										<span className="label">Total aprox.</span>
-										<span>{formatPrice(selectedService.price)}</span>
+										<span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
 									</div>
 									{form.domicilio && (
 										<p className="summary-note">
@@ -563,7 +623,38 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 								id="booking-message"
 								className={`booking-message ${message.type}`}
 							>
-								{message.text}
+								{message.type === 'error' && message.text}
+								{message.type === 'success' && confirmedBooking && (
+									<div className="booking-confirmation">
+										<p className="confirmation-title">¡Tu cita ha sido registrada con éxito!</p>
+										<p>
+											<strong>Daniela se comunicará contigo pronto para confirmar la cita y el valor final.</strong>
+										</p>
+										<p className="confirmation-disclaimer">
+											El precio mostrado es un valor aproximado. El valor final puede variar según peinados especiales, requerimientos adicionales u otras particularidades del servicio. El valor definitivo será confirmado directamente por Daniela.
+										</p>
+										<div className="calendar-buttons">
+											<p className="calendar-label">¿Deseas agregar esta cita a tu calendario?</p>
+											<div className="calendar-actions">
+												<a
+													href={buildGoogleCalendarUrl(confirmedBooking)}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="btn btn-calendar"
+												>
+													Google Calendar
+												</a>
+												<button
+													type="button"
+													className="btn btn-calendar"
+													onClick={() => downloadICS(confirmedBooking)}
+												>
+													Apple Calendar / Outlook
+												</button>
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
 						)}
 					</form>
