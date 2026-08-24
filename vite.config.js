@@ -11,7 +11,16 @@ export default defineConfig(({ mode }) => {
   for (const key of [
     'MAKE_AVAILABILITY_WEBHOOK_URL',
     'MAKE_BOOKING_WEBHOOK_URL',
-    'CLOUDINARY_BASE_URL'
+    'CLOUDINARY_BASE_URL',
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    'VITE_FIREBASE_APP_ID',
+    'VITE_FIREBASE_MEASUREMENT_ID',
+    'REACT_APP_SHEETS_API_URL',
+    'REACT_APP_SHEETS_API_KEY'
   ]) {
     define[`import.meta.env.${key}`] = JSON.stringify(env[key] || '')
   }
