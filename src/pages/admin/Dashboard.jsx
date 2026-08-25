@@ -129,7 +129,7 @@ export default function Dashboard() {
             ➕ Nueva Cita
           </button>
           <button className="admin-action-btn admin-action-warning" onClick={() => setShowBlockDay(true)}>
-            🔒 Cerrar Día
+            🔒 Bloquear Agenda
           </button>
         </div>
 

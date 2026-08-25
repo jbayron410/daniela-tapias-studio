@@ -1,8 +1,17 @@
+// ──────────────────────────────────────────────────────────────
+// SYNC: Este formulario y BookingForm.jsx (público) deben mantenerse
+// sincronizados. Si cambias campos, validaciones, precios o payload aquí,
+// aplica los mismos cambios en el formulario público (y viceversa).
+// ──────────────────────────────────────────────────────────────
 import { useState, useEffect, useRef } from 'react';
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 import { SERVICES } from '../../data/services';
 import { createBooking, getAvailability } from '../../api/n8n';
 import { cancelCita } from '../../api/sheets';
 import { parseCitaDateTime } from './helpers';
+
+const MAQUILLAJE_PRICE = 80000;
 
 function formatPrice(price) {
   return new Intl.NumberFormat('es-CO', {
@@ -75,17 +84,19 @@ function citaToFormData(cita) {
 
 function buildPayload(form) {
   const service = SERVICES.find((s) => s.id === form.serviceId);
+  const maquillajeCost = form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
+  const totalPrice = service.price + maquillajeCost;
   const { startISO, endISO } = toEventISO(form.date, form.time, service.duration);
   return {
     servicio: service.name,
-    precio: service.price,
+    precio: totalPrice,
     nombre_completo: form.name.trim(),
     whatsapp: form.phone ? form.phone.replace(/[^0-9]/g, '') : '',
-    email: form.email.trim(),
+    email: form.email.trim() || 'sinCorreo@ejemplo.com',
     a_domicilio: form.domicilio,
     detalles_domicilio: form.domicilio ? form.domicilioDetalles.trim() : 'NA',
     requiere_maquillaje: form.requiereMaquillaje,
-    notas: form.notes.trim(),
+    notas: form.notes.trim() || 'Sin notas adicionales',
     fecha_inicio: startISO,
     fecha_fin: endISO
   };
@@ -267,11 +278,16 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
           <div className="modal-row">
             <div className="modal-field">
               <label>WhatsApp</label>
-              <input
-                name="phone"
+              <PhoneInput
+                international
+                defaultCountry="CO"
+                placeholder="300 123 4567"
                 value={form.phone}
-                onChange={handleChange}
-                placeholder="573144447788"
+                onChange={(value) =>
+                  handleChange({
+                    target: { name: 'phone', value: value || '', type: 'text', checked: false }
+                  })
+                }
               />
             </div>
             <div className="modal-field">
@@ -391,9 +407,21 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
                 <span className="label">Hora</span>
                 <span>{formatTimeSpanish(form.time)}</span>
               </div>
+              {form.domicilio && (
+                <div className="summary-row">
+                  <span className="label">Domicilio</span>
+                  <span>Según ubicación (a confirmar)</span>
+                </div>
+              )}
+              {form.requiereMaquillaje && (
+                <div className="summary-row">
+                  <span className="label">Maquillaje</span>
+                  <span>{formatPrice(MAQUILLAJE_PRICE)}</span>
+                </div>
+              )}
               <div className="summary-row total">
-                <span className="label">Total</span>
-                <span>{formatPrice(selectedService.price)}</span>
+                <span className="label">Total aprox.</span>
+                <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
               </div>
             </div>
           )}

@@ -1,3 +1,8 @@
+// ──────────────────────────────────────────────────────────────
+// SYNC: Este formulario y AdminBookingModal.jsx deben mantenerse
+// sincronizados. Si cambias campos, validaciones, precios o payload aquí,
+// aplica los mismos cambios en el formulario del admin (y viceversa).
+// ──────────────────────────────────────────────────────────────
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PhoneInput from 'react-phone-number-input';
 import { isValidPhoneNumber } from 'libphonenumber-js';
