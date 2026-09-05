@@ -9,10 +9,12 @@ import ConfirmModal from '../../components/admin/ConfirmModal';
 import CitaDetailModal from '../../components/admin/CitaDetailModal';
 import AdminBookingModal from '../../components/admin/AdminBookingModal';
 import BlockDayModal from '../../components/admin/BlockDayModal';
+import GalleryManager from '../../components/admin/GalleryManager';
 import { getMesLabel, sortCitas, citaEnRangoTemporal } from '../../components/admin/helpers';
 import '../../styles/admin.css';
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState('citas');
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -115,79 +117,100 @@ export default function Dashboard() {
       <DashboardHeader onRefresh={loadCitas} loading={loading} />
 
       <main className="admin-main">
-        {error && (
-          <div className="admin-error-banner">
-            <span>⚠️ {error}</span>
-            <button onClick={loadCitas}>Reintentar</button>
-          </div>
+        <nav className="admin-tabs">
+          <button
+            className={`admin-tab ${activeTab === 'citas' ? 'active' : ''}`}
+            onClick={() => setActiveTab('citas')}
+          >
+            Citas
+          </button>
+          <button
+            className={`admin-tab ${activeTab === 'galeria' ? 'active' : ''}`}
+            onClick={() => setActiveTab('galeria')}
+          >
+            Galería
+          </button>
+        </nav>
+
+        {activeTab === 'citas' && (
+          <>
+            {error && (
+              <div className="admin-error-banner">
+                <span>⚠️ {error}</span>
+                <button onClick={loadCitas}>Reintentar</button>
+              </div>
+            )}
+
+            <StatsCards citas={citas} />
+
+            <div className="admin-actions-bar">
+              <button className="admin-action-btn admin-action-primary" onClick={() => { setEditingCita(null); setShowBooking(true); }}>
+                ➕ Nueva Cita
+              </button>
+              <button className="admin-action-btn admin-action-warning" onClick={() => setShowBlockDay(true)}>
+                🔒 Bloquear Agenda
+              </button>
+            </div>
+
+            <div className="admin-citas-section">
+              <div className="citas-section-header">
+                <h2>Citas</h2>
+                <div className="citas-section-right">
+                  <span className="citas-count">{citasFiltradas.length} resultado{citasFiltradas.length !== 1 ? 's' : ''}</span>
+                  <div className="view-toggle">
+                    <button
+                      className={`view-toggle-btn ${vista === 'lista' ? 'active' : ''}`}
+                      onClick={() => setVista('lista')}
+                    >
+                      ☰ Lista
+                    </button>
+                    <button
+                      className={`view-toggle-btn ${vista === 'calendario' ? 'active' : ''}`}
+                      onClick={() => setVista('calendario')}
+                    >
+                      📅 Calendario
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <FilterBar
+                citas={citas}
+                filtroEstado={filtroEstado}
+                setFiltroEstado={setFiltroEstado}
+                filtroMes={filtroMes}
+                setFiltroMes={setFiltroMes}
+                filtroTemporal={filtroTemporal}
+                setFiltroTemporal={setFiltroTemporal}
+                busqueda={busqueda}
+                setBusqueda={setBusqueda}
+                orden={orden}
+                setOrden={setOrden}
+              />
+
+              {loading ? (
+                <div className="admin-loading">
+                  <div className="spinner" />
+                  <p>Cargando citas desde Google Sheets...</p>
+                </div>
+              ) : vista === 'lista' ? (
+                <CitasTable
+                  citas={citasFiltradas}
+                  onConfirm={handleConfirm}
+                  onCancel={(cita) => setCitaToCancel(cita)}
+                  onEdit={handleEdit}
+                />
+              ) : (
+                <CalendarView
+                  citas={citasFiltradas}
+                  onEventClick={(cita) => setCitaDetail(cita)}
+                />
+              )}
+            </div>
+          </>
         )}
 
-        <StatsCards citas={citas} />
-
-        <div className="admin-actions-bar">
-          <button className="admin-action-btn admin-action-primary" onClick={() => { setEditingCita(null); setShowBooking(true); }}>
-            ➕ Nueva Cita
-          </button>
-          <button className="admin-action-btn admin-action-warning" onClick={() => setShowBlockDay(true)}>
-            🔒 Bloquear Agenda
-          </button>
-        </div>
-
-        <div className="admin-citas-section">
-          <div className="citas-section-header">
-            <h2>Citas</h2>
-            <div className="citas-section-right">
-              <span className="citas-count">{citasFiltradas.length} resultado{citasFiltradas.length !== 1 ? 's' : ''}</span>
-              <div className="view-toggle">
-                <button
-                  className={`view-toggle-btn ${vista === 'lista' ? 'active' : ''}`}
-                  onClick={() => setVista('lista')}
-                >
-                  ☰ Lista
-                </button>
-                <button
-                  className={`view-toggle-btn ${vista === 'calendario' ? 'active' : ''}`}
-                  onClick={() => setVista('calendario')}
-                >
-                  📅 Calendario
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <FilterBar
-            citas={citas}
-            filtroEstado={filtroEstado}
-            setFiltroEstado={setFiltroEstado}
-            filtroMes={filtroMes}
-            setFiltroMes={setFiltroMes}
-            filtroTemporal={filtroTemporal}
-            setFiltroTemporal={setFiltroTemporal}
-            busqueda={busqueda}
-            setBusqueda={setBusqueda}
-            orden={orden}
-            setOrden={setOrden}
-          />
-
-          {loading ? (
-            <div className="admin-loading">
-              <div className="spinner" />
-              <p>Cargando citas desde Google Sheets...</p>
-            </div>
-          ) : vista === 'lista' ? (
-            <CitasTable
-              citas={citasFiltradas}
-              onConfirm={handleConfirm}
-              onCancel={(cita) => setCitaToCancel(cita)}
-              onEdit={handleEdit}
-            />
-          ) : (
-            <CalendarView
-              citas={citasFiltradas}
-              onEventClick={(cita) => setCitaDetail(cita)}
-            />
-          )}
-        </div>
+        {activeTab === 'galeria' && <GalleryManager />}
       </main>
 
       {citaToCancel && (

@@ -20,7 +20,9 @@ export default defineConfig(({ mode }) => {
     'VITE_FIREBASE_APP_ID',
     'VITE_FIREBASE_MEASUREMENT_ID',
     'REACT_APP_SHEETS_API_URL',
-    'REACT_APP_SHEETS_API_KEY'
+    'REACT_APP_SHEETS_API_KEY',
+    'VITE_CLOUDINARY_CLOUD_NAME',
+    'VITE_CLOUDINARY_UPLOAD_PRESET'
   ]) {
     define[`import.meta.env.${key}`] = JSON.stringify(env[key] || '')
   }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { GALLERY, CATEGORIES } from '../data/services';
+import { CATEGORIES } from '../data/services';
+import { fetchGallery, fetchCategoryVisibility, fetchCategoryLabels } from '../api/gallery';
 
 const MOBILE_BREAKPOINT = 767;
 const TABLET_BREAKPOINT = 1024;
@@ -33,9 +34,42 @@ export default function Gallery() {
   const [activeCategory, setActiveCategory] = useState('sociales');
   const [lightboxItem, setLightboxItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [gallery, setGallery] = useState(null);
+  const [categoryVisibility, setCategoryVisibility] = useState(null);
+  const [categoryLabels, setCategoryLabels] = useState({});
+  const [loading, setLoading] = useState(true);
   const { isMobile, isTablet } = useViewport();
 
-  const items = GALLERY[activeCategory] || [];
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([fetchGallery(), fetchCategoryVisibility(), fetchCategoryLabels()])
+      .then(([galleryData, visibility, labels]) => {
+        if (cancelled) return;
+        setGallery(galleryData);
+        setCategoryVisibility(visibility);
+        setCategoryLabels(labels);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setGallery({});
+          setCategoryVisibility({});
+          setLoading(false);
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const getCatLabel = (cat) => categoryLabels[cat.id] || cat.label;
+
+  const enabledCategories = CATEGORIES.filter((cat) => {
+    if (!categoryVisibility) return false;
+    const val = categoryVisibility[cat.id];
+    return val === undefined ? true : val;
+  });
+
+  const activeGallery = gallery || {};
+  const items = (activeGallery[activeCategory] || []).map((item) => item.url);
   const shouldPaginate = isMobile || isTablet;
   const itemsPerPage = isMobile
     ? ITEMS_PER_PAGE_MOBILE
@@ -59,6 +93,13 @@ export default function Gallery() {
 
   const handleClose = () => setLightboxItem(null);
 
+  useEffect(() => {
+    if (enabledCategories.length > 0 && !enabledCategories.find((c) => c.id === activeCategory)) {
+      setActiveCategory(enabledCategories[0].id);
+      setCurrentPage(1);
+    }
+  }, [enabledCategories, activeCategory]);
+
   const handleCategoryChange = (catId) => {
     setActiveCategory(catId);
     setCurrentPage(1);
@@ -69,6 +110,24 @@ export default function Gallery() {
     // Scroll suave a la galería al cambiar de página
     document.getElementById('galeria')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  if (loading) {
+    return (
+      <section id="galeria" className="section section-alt">
+        <div className="container">
+          <div className="section-header">
+            <span className="section-tag">Portafolio</span>
+            <h2>Nuestros trabajos</h2>
+          </div>
+          <div className="gallery-loading">
+            <div className="spinner" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (enabledCategories.length === 0) return null;
 
   return (
     <section id="galeria" className="section section-alt">
@@ -82,17 +141,19 @@ export default function Gallery() {
           </p>
         </div>
 
-        <div className="gallery-tabs">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`gallery-tab ${activeCategory === cat.id ? 'active' : ''}`}
-              onClick={() => handleCategoryChange(cat.id)}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </div>
+        {enabledCategories.length > 1 && (
+          <div className="gallery-tabs">
+            {enabledCategories.map((cat) => (
+              <button
+                key={cat.id}
+                className={`gallery-tab ${activeCategory === cat.id ? 'active' : ''}`}
+                onClick={() => handleCategoryChange(cat.id)}
+              >
+                {getCatLabel(cat)}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="gallery-grid">
           {paginatedItems.map((src, index) => (
