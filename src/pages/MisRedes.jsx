@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { toCloudinaryUrl } from '../api/cloudinary';
 
 const InstagramIcon = () => (
@@ -33,7 +34,7 @@ const LINKS = [
   {
     label: 'Agendar tu cita',
     sublabel: 'Reserva en línea',
-    href: 'https://www.danielatapias.com/agendar',
+    to: '/agendar',
     Icon: CalendarIcon,
     primary: true
   },
@@ -52,7 +53,7 @@ const LINKS = [
   {
     label: 'Página web',
     sublabel: 'www.danielatapias.com',
-    href: 'https://www.danielatapias.com',
+    to: '/',
     Icon: GlobeIcon
   }
 ];
@@ -73,21 +74,24 @@ export default function MisRedes() {
         <p className="linktree-tagline">Novias · Quinceañeras · Eventos Sociales</p>
 
         <div className="linktree-links">
-          {LINKS.map(({ label, sublabel, href, Icon, primary }) => (
-            <a
-              key={label}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`linktree-btn ${primary ? 'linktree-btn-primary' : ''}`}
-            >
-              <span className="linktree-btn-icon"><Icon /></span>
-              <span className="linktree-btn-text">
-                <span className="linktree-btn-label">{label}</span>
-                <span className="linktree-btn-sub">{sublabel}</span>
-              </span>
-            </a>
-          ))}
+          {LINKS.map(({ label, sublabel, href, to, Icon, primary }) => {
+            const content = (
+              <>
+                <span className="linktree-btn-icon"><Icon /></span>
+                <span className="linktree-btn-text">
+                  <span className="linktree-btn-label">{label}</span>
+                  <span className="linktree-btn-sub">{sublabel}</span>
+                </span>
+              </>
+            );
+            const cls = `linktree-btn ${primary ? 'linktree-btn-primary' : ''}`;
+
+            return to ? (
+              <Link key={label} to={to} className={cls}>{content}</Link>
+            ) : (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer" className={cls}>{content}</a>
+            );
+          })}
         </div>
 
         <footer className="linktree-footer">
