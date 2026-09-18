@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchCitas, confirmCita, cancelCita } from '../../api/sheets';
+import { getBlocks } from '../../api/n8n';
 import DashboardHeader from '../../components/admin/DashboardHeader';
 import StatsCards from '../../components/admin/StatsCards';
 import FilterBar from '../../components/admin/FilterBar';
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const [showBooking, setShowBooking] = useState(false);
   const [showBlockDay, setShowBlockDay] = useState(false);
   const [editingCita, setEditingCita] = useState(null);
+  const [bloqueos, setBloqueos] = useState([]);
 
   const loadCitas = useCallback(async () => {
     setLoading(true);
@@ -46,6 +48,19 @@ export default function Dashboard() {
   useEffect(() => {
     loadCitas();
   }, [loadCitas]);
+
+  const loadBloqueos = useCallback(async () => {
+    try {
+      const data = await getBlocks();
+      setBloqueos(data);
+    } catch {
+      // Los bloqueos no son críticos, fallar silenciosamente
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBloqueos();
+  }, [loadBloqueos]);
 
   const handleConfirm = useCallback((cita) => {
     setCitas((prev) =>
@@ -203,6 +218,7 @@ export default function Dashboard() {
               ) : (
                 <CalendarView
                   citas={citasFiltradas}
+                  bloqueos={bloqueos}
                   onEventClick={(cita) => setCitaDetail(cita)}
                 />
               )}
@@ -249,7 +265,7 @@ export default function Dashboard() {
       {showBlockDay && (
         <BlockDayModal
           onClose={() => setShowBlockDay(false)}
-          onSuccess={loadCitas}
+          onSuccess={() => { loadCitas(); loadBloqueos(); }}
         />
       )}
     </div>

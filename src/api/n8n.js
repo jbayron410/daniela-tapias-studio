@@ -1,13 +1,13 @@
 // ============================================
-// Capa de comunicación con webhooks (Make)
+// Capa de comunicación con Google Apps Script
 // ============================================
 
-// Webhook de Make: consulta los eventos ocupados del calendario
-const MAKE_AVAILABILITY_WEBHOOK_URL = import.meta.env
-	.MAKE_AVAILABILITY_WEBHOOK_URL;
-
-// Webhook de Make: crea la reserva (inserta el evento en Google Calendar)
-const MAKE_BOOKING_WEBHOOK_URL = import.meta.env.MAKE_BOOKING_WEBHOOK_URL;
+// En desarrollo usa el proxy de Vite (evita CORS); en producción, la URL directa
+const APPS_SCRIPT_URL =
+  import.meta.env.DEV
+    ? '/api/apps-script'
+    : import.meta.env.VITE_APPS_SCRIPT_URL;
+const API_KEY = import.meta.env.VITE_APPS_SCRIPT_KEY;
 
 // Horario laboral: primer slot 5:00 AM, último slot empieza 10:00 PM
 const OPENING_SLOT_HOUR = 5;
@@ -15,116 +15,95 @@ const LAST_SLOT_HOUR = 22;
 
 /**
  * Consulta los slots disponibles para una fecha específica.
- * Hace GET al webhook de Make con ?fecha=YYYY-MM-DD, recibe los
- * eventos ocupados y calcula las horas libres restando los bloqueos
- * del horario laboral (5:00 AM - 10:00 PM, slots de 1 hora).
+ * Llama a Apps Script → Google Calendar → retorna horas libres.
  * @param {string} date - Fecha en formato YYYY-MM-DD
  * @returns {Promise<string[]>} - Array de horas disponibles "HH:00" (formato 24h)
  */
 export async function getAvailability(date) {
-  try {
-    const response = await fetch(
-      `${MAKE_AVAILABILITY_WEBHOOK_URL}?fecha=${date}`,
-      { method: 'GET' }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Error al consultar disponibilidad: ${response.status}`);
-    }
-
-    const data = await response.json();
-    const eventos = Array.isArray(data.eventos) ? data.eventos : [];
-    return computeAvailableSlots(date, eventos);
-  } catch (error) {
-    console.error('Error consultando disponibilidad:', error);
-    // Fallback: generar slots básicos si el webhook no está disponible
-    // (útil para desarrollo sin conexión)
-    return generateFallbackSlots(date);
-  }
-}
-
-/**
- * Envía una reserva al webhook de Make para crear el evento en Google Calendar
- * @param {Object} booking - Datos de la reserva (payload en español)
- * @returns {Promise<Object>} - Respuesta de Make
- */
-export async function createBooking(booking) {
-  const response = await fetch(MAKE_BOOKING_WEBHOOK_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(booking)
-  });
+  const url = `${APPS_SCRIPT_URL}?action=availability&fecha=${date}&key=${encodeURIComponent(API_KEY)}`;
+  const response = await fetch(url, { method: 'GET' });
 
   if (!response.ok) {
-    throw new Error(`Error al crear la reserva: ${response.status}`);
+    throw new Error(`Error al consultar disponibilidad: ${response.status}`);
   }
 
-  const text = await response.text();
-  try {
-    return text ? JSON.parse(text) : {};
-  } catch {
-    return {};
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error);
   }
-}
 
-/**
- * Calcula las horas disponibles restando los eventos ocupados
- * del horario laboral (5:00 AM - 10:00 PM, slots de 1 hora).
- * @param {string} date - Fecha en formato YYYY-MM-DD
- * @param {Array<{start: string, end: string}>} eventos - Eventos ocupados
- * @returns {string[]} - Slots disponibles "HH:00"
- */
-function computeAvailableSlots(date, eventos) {
-  const [year, month, day] = date.split('-').map(Number);
-  const now = new Date();
-  const isToday = now.toDateString() === new Date(year, month - 1, day).toDateString();
+  // Día cerrado por Daniela
+  if (data.diaCompleto) {
+    return [];
+  }
 
-  // Convertir eventos a rangos [inicio, fin)
-  const ocupados = eventos
-    .map((e) => ({
-      start: new Date(e.start),
-      end: new Date(e.end)
-    }))
-    .filter((e) => !isNaN(e.start) && !isNaN(e.end));
+  const slots = Array.isArray(data.slots) ? data.slots : [];
 
-  const slots = [];
-  const pad = (n) => String(n).padStart(2, '0');
-
-  for (let h = OPENING_SLOT_HOUR; h <= LAST_SLOT_HOUR; h++) {
-    const slotStart = new Date(year, month - 1, day, h, 0);
-    const slotEnd = new Date(year, month - 1, day, h + 1, 0);
-
-    // Si es hoy, descartar horas que ya pasaron
-    if (isToday && slotStart <= now) continue;
-
-    // Si el slot se solapa con algún evento ocupado, se bloquea
-    const bloqueado = ocupados.some(
-      (e) => slotStart < e.end && slotEnd > e.start
-    );
-
-    if (!bloqueado) {
-      slots.push(`${pad(h)}:00`);
-    }
+  // Si Apps Script no devolvió slots calculados, calcular localmente
+  if (slots.length === 0 && !data.diaCompleto) {
+    return [];
   }
 
   return slots;
 }
 
 /**
- * Genera slots de contingencia (cuando el webhook no está conectado).
- * NO bloquea horas ocupadas — solo para desarrollo visual.
+ * Envía una reserva a Apps Script para crear el evento en Google Calendar,
+ * guardar en Sheet y enviar WhatsApp.
+ * @param {Object} booking - Datos de la reserva
+ * @returns {Promise<Object>} - Respuesta de Apps Script
  */
-function generateFallbackSlots(date) {
-  const [year, month, day] = date.split('-').map(Number);
-  const now = new Date();
-  const selectedDate = new Date(year, month - 1, day);
-  const isToday = now.toDateString() === selectedDate.toDateString();
-  const currentHour = now.getHours() + (now.getMinutes() > 0 ? 1 : 0);
+export async function createBooking(booking) {
+  const response = await fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...booking,
+      key: API_KEY,
+      action: 'book'
+    })
+  });
 
-  // Si la fecha ya pasó, no hay slots
-  if (selectedDate < new Date(now.toDateString())) {
-    return [];
+  if (!response.ok) {
+    throw new Error(`Error al crear la reserva: ${response.status}`);
   }
 
-  return computeAvailableSlots(date, []);
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  if (data.success === false) {
+    throw new Error(data.error || 'No se pudo registrar la cita');
+  }
+
+  return data;
+}
+
+/**
+ * Consulta los eventos de bloqueo (DÍA CERRADO / Franja bloqueada) del calendario.
+ * @param {string} [from] - Fecha inicio rango YYYY-MM-DD (opcional)
+ * @param {string} [to] - Fecha fin rango YYYY-MM-DD (opcional)
+ * @returns {Promise<Array>} - Lista de bloqueos con title, start, end, description
+ */
+export async function getBlocks(from, to) {
+  let url = `${APPS_SCRIPT_URL}?action=blocks&key=${encodeURIComponent(API_KEY)}`;
+  if (from) url += `&from=${from}`;
+  if (to) url += `&to=${to}`;
+
+  const response = await fetch(url, { method: 'GET' });
+
+  if (!response.ok) {
+    throw new Error(`Error al consultar bloqueos: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  return Array.isArray(data) ? data : [];
 }

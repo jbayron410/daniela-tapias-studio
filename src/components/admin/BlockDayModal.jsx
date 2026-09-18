@@ -65,7 +65,7 @@ export default function BlockDayModal({ onClose, onSuccess }) {
         : `Franja bloqueada: ${formatHourLabel(startH)} - ${formatHourLabel(endH)}${reason ? ` — ${reason}` : ''}`;
 
       await createBooking({
-        servicio: 'DÍA CERRADO',
+        servicio: fullDay ? 'DÍA CERRADO' : 'BLOQUEADO',
         precio: 0,
         nombre_completo: 'Bloqueado por admin',
         whatsapp: '',

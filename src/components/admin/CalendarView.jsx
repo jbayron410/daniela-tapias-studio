@@ -31,8 +31,25 @@ function citasToEvents(citas) {
   }).filter(Boolean);
 }
 
-export default function CalendarView({ citas, onEventClick }) {
-  const events = citasToEvents(citas);
+function bloqueosToEvents(bloqueos) {
+  return bloqueos.map((b, i) => {
+    const isDiaCerrado = b.title.toUpperCase().indexOf('DÍA CERRADO') !== -1;
+    return {
+      id: `bloqueo-${i}`,
+      title: isDiaCerrado ? '🔒 Día cerrado' : `🔒 ${b.title}`,
+      start: b.start,
+      end: b.end,
+      backgroundColor: '#78909c',
+      borderColor: '#546e7a',
+      textColor: '#fff',
+      display: 'block',
+      extendedProps: { isBloqueo: true, description: b.description }
+    };
+  });
+}
+
+export default function CalendarView({ citas, bloqueos = [], onEventClick }) {
+  const events = [...citasToEvents(citas), ...bloqueosToEvents(bloqueos)];
 
   return (
     <div className="calendar-view-wrapper">
@@ -63,7 +80,12 @@ export default function CalendarView({ citas, onEventClick }) {
         eventDisplay="block"
         dayMaxEvents={4}
         eventDidMount={(info) => {
-          info.el.title = `${info.event.extendedProps.Clienta}\n${info.event.extendedProps.Servicio}\n${info.event.extendedProps.estadoLabel}`;
+          const props = info.event.extendedProps;
+          if (props.isBloqueo) {
+            info.el.title = props.description || info.event.title;
+          } else {
+            info.el.title = `${props.Clienta}\n${props.Servicio}\n${props.estadoLabel}`;
+          }
         }}
       />
     </div>
