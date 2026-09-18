@@ -6,6 +6,8 @@ import App from './App';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import AdminLayout from './pages/admin/AdminLayout';
+import Agendar from './pages/Agendar';
+import MisRedes from './pages/MisRedes';
 import './styles/global.css';
 
 function LoginGuard() {
@@ -21,6 +23,8 @@ createRoot(document.getElementById('root')).render(
       <AuthProvider>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/agendar" element={<Agendar />} />
+          <Route path="/mis-redes" element={<MisRedes />} />
           <Route path="/admin/login" element={<LoginGuard />} />
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<Dashboard />} />
