@@ -27,7 +27,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
-    publicDir: 'assets',
     define,
     server: {
       port: 5173,
