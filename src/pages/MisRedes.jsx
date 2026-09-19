@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { toCloudinaryUrl } from '../api/cloudinary';
+import SEO from '../components/SEO';
 
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
@@ -61,6 +62,11 @@ const LINKS = [
 export default function MisRedes() {
   return (
     <div className="linktree">
+      <SEO
+        title="Mis Redes"
+        description="Todos los enlaces de Daniela Tapias Studio. Instagram, WhatsApp, agenda tu cita y más."
+        path="/mis-redes"
+      />
       <div className="linktree-card">
         <div className="linktree-avatar">
           <img

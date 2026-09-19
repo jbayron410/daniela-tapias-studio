@@ -6,6 +6,7 @@ import Services from './components/Services';
 import About from './components/About';
 import BookingForm from './components/BookingForm';
 import Footer from './components/Footer';
+import SEO from './components/SEO';
 
 export default function App() {
   const [preselectService, setPreselectService] = useState(null);
@@ -27,6 +28,11 @@ export default function App() {
 
   return (
     <>
+      <SEO
+        title="Inicio"
+        description="Peinadora profesional en Cartago, Valle del Cauca. Especialista en peinados para novias, quinceañeras y eventos sociales. Agenda tu cita en línea."
+        path="/"
+      />
       <Navbar onBook={handleBook} />
       <main>
         <Hero onBook={handleBook} />
