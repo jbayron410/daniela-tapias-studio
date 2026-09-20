@@ -33,23 +33,23 @@ const GlobeIcon = () => (
 
 const LINKS = [
   {
+    label: 'WhatsApp',
+    sublabel: 'Escríbeme directo',
+    href: 'https://wa.me/573216646983',
+    Icon: WhatsAppIcon,
+    primary: true
+  },
+  {
     label: 'Agendar tu cita',
     sublabel: 'Reserva en línea',
     to: '/agendar',
-    Icon: CalendarIcon,
-    primary: true
+    Icon: CalendarIcon
   },
   {
     label: 'Instagram',
     sublabel: '@danielatapias_studio',
     href: 'https://instagram.com/danielatapias_studio',
     Icon: InstagramIcon
-  },
-  {
-    label: 'WhatsApp',
-    sublabel: 'Escríbeme directo',
-    href: 'https://wa.me/573216646983',
-    Icon: WhatsAppIcon
   },
   {
     label: 'Página web',
