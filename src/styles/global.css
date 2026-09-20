@@ -1634,6 +1634,82 @@ button {
   }
 }
 
+/* ============ WhatsApp CTA Banner (/agendar) ============ */
+.whatsapp-cta-banner {
+  background: linear-gradient(135deg, #25D366, #128C7E);
+  padding: 28px 0;
+}
+
+.whatsapp-cta-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.whatsapp-cta-text h2 {
+  color: #fff;
+  font-size: 1.4rem;
+  margin-bottom: 4px;
+}
+
+.whatsapp-cta-text p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.btn-whatsapp-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: #fff;
+  color: #128C7E;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 50px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-whatsapp-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-whatsapp-cta .wa-icon {
+  flex-shrink: 0;
+}
+
+.btn-whatsapp-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 10px 20px;
+  background: #25D366;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-whatsapp-inline:hover {
+  background: #1da851;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .whatsapp-cta-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 /* ============ Página standalone /agendar ============ */
 .standalone-booking {
   min-height: 100vh;
