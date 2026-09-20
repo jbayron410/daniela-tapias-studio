@@ -49,7 +49,10 @@ export default function Hero({ onBook }) {
 								src={toCloudinaryUrl(
 									"/w_772,h_1160,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png",
 								)}
+								srcSet={`${toCloudinaryUrl("/w_380,h_570,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png")} 380w, ${toCloudinaryUrl("/w_540,h_810,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png")} 540w, ${toCloudinaryUrl("/w_772,h_1160,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png")} 772w`}
+								sizes="(max-width: 767px) 380px, (max-width: 1024px) 540px, 772px"
 								alt="Daniela Tapias - Peinadora Profesional"
+								fetchpriority="high"
 							/>
 						</div>
 						<div className="hero-media-card">

@@ -1,0 +1,44 @@
+# Daniela Tapias Studio
+
+> Sitio web profesional de peinados con agendamiento en linea. Peinadora en Cartago, Valle del Cauca, Colombia.
+
+## Servicios
+
+- **Sociales** ($60.000 COP) - Peinados para eventos sociales, grados, celebraciones
+- **Novias** ($100.000 COP) - Peinados para bodas con prueba previa incluida
+- **Quinceañeras** ($100.000 COP) - Peinados para quinceañeros
+- **Personalizados** ($60.000 COP) - Peinados a medida, opcion a domicilio
+
+Todos los servicios tienen duracion aproximada de 1 hora.
+
+## Paginas
+
+- [/](/) - Pagina principal con galeria, servicios y formulario de agendamiento
+- [/agendar](/agendar) - Pagina dedicada para agendar citas en linea
+- [/mis-redes](/mis-redes) - Redes sociales de Daniela Tapias Studio
+
+## Agendamiento
+
+El agendamiento funciona en linea a traves del formulario en /agendar:
+
+1. La clienta selecciona un servicio
+2. Ingresa sus datos personales (nombre, WhatsApp, email opcional)
+3. Elige una fecha (desde manana, maximo 60 dias)
+4. Selecciona una hora (horario de 5:00 AM a 10:00 PM)
+5. Confirma la pre-agenda
+
+La cita queda registrada como pre-agenda. Daniela confirma por WhatsApp.
+Las citas para el mismo dia se coordinan directamente por WhatsApp: https://wa.me/573216646983
+
+## Contacto
+
+- WhatsApp: +57 321 664 6983
+- Email: danielatapias1226@gmail.com
+- Ubicacion: Cartago, Valle del Cauca, Colombia
+- Instagram: https://instagram.com/danielatapias_studio
+
+## Otros
+
+- Horario: Lunes a Domingo, 5:00 AM - 11:00 PM
+- Servicio a domicilio disponible (precio varia segun ubicacion)
+- Maquillaje adicional: $80.000 COP
