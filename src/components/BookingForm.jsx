@@ -8,7 +8,7 @@ import PhoneInput from 'react-phone-number-input';
 import { isValidPhoneNumber } from 'libphonenumber-js';
 import 'react-phone-number-input/style.css';
 import { SERVICES, OPENING_HOUR, LAST_SLOT_START } from '../data/services';
-import { getAvailability, createBooking } from '../api/n8n';
+import { getAllSlotsWithAvailability, createBooking } from '../api/n8n';
 
 const MAQUILLAJE_PRICE = 80000;
 
@@ -126,9 +126,12 @@ const emptyErrors = {};
 export default function BookingForm({ preselectService, onResetPreselect }) {
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState(emptyErrors);
-  const [slots, setSlots] = useState([]);
+  const [allSlots, setAllSlots] = useState([]);
+  const [availableSet, setAvailableSet] = useState(new Set());
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [slotsError, setSlotsError] = useState('');
+  const [selectedBusySlot, setSelectedBusySlot] = useState(false);
+  const [timeSuggestions, setTimeSuggestions] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
   const [confirmedBooking, setConfirmedBooking] = useState(null);
@@ -146,7 +149,8 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
   // Consultar disponibilidad cuando cambia la fecha
   useEffect(() => {
     if (!form.date) {
-      setSlots([]);
+      setAllSlots([]);
+      setAvailableSet(new Set());
       return;
     }
 
@@ -157,21 +161,30 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
     let cancelled = false;
     setLoadingSlots(true);
     setSlotsError('');
+    setSelectedBusySlot(false);
+    setTimeSuggestions(null);
     setForm((prev) => ({ ...prev, time: '' }));
 
-    getAvailability(form.date)
-      .then((availableSlots) => {
+    getAllSlotsWithAvailability(form.date)
+      .then(({ allSlots: slots, availableSet: availSet, diaCompleto }) => {
         if (cancelled) return;
-        if (Array.isArray(availableSlots) && availableSlots.length > 0) {
-          setSlots(availableSlots);
+        if (diaCompleto) {
+          setAllSlots(slots);
+          setAvailableSet(new Set());
+          setSlotsError('Daniela no atiende este día.');
+        } else if (availSet.size === 0) {
+          setAllSlots(slots);
+          setAvailableSet(new Set());
+          setSlotsError('No hay agenda disponible para este día.');
         } else {
-          setSlots([]);
-          setSlotsError('No hay disponibilidad para este día.');
+          setAllSlots(slots);
+          setAvailableSet(availSet);
         }
       })
       .catch((err) => {
         if (cancelled) return;
-        setSlots([]);
+        setAllSlots([]);
+        setAvailableSet(new Set());
         setSlotsError('Error al consultar disponibilidad. Intenta nuevamente.');
         console.error(err);
       })
@@ -198,6 +211,34 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
   const handleBlur = (e) => {
     const { name } = e.target;
     setTouched((prev) => ({ ...prev, [name]: true }));
+  };
+
+  const handleTimeSelect = (slot) => {
+    if (availableSet.has(slot)) {
+      setForm((prev) => ({ ...prev, time: slot }));
+      setErrors((prev) => ({ ...prev, time: '' }));
+      setSelectedBusySlot(false);
+      setTimeSuggestions(null);
+    } else {
+      setForm((prev) => ({ ...prev, time: slot }));
+      setSelectedBusySlot(true);
+      const above = [];
+      const below = [];
+      for (const s of allSlots) {
+        if (availableSet.has(s)) {
+          if (s < slot) below.push(s);
+          else if (s > slot) above.push(s);
+        }
+      }
+      if (above.length === 0 && below.length === 0) {
+        setTimeSuggestions(null);
+      } else {
+        setTimeSuggestions({
+          above: above.length > 0 ? above[0] : null,
+          below: below.length > 0 ? below[0] : null
+        });
+      }
+    }
   };
 
   const validate = useCallback(() => {
@@ -304,7 +345,9 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
   const selectedService = SERVICES.find((s) => s.id === form.serviceId);
 
-  const minDate = new Date().toISOString().split('T')[0];
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split('T')[0];
   const maxDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   return (
@@ -532,34 +575,60 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 									{(touched.date || errors.date) && errors.date && (
 										<p className="error-text">{errors.date}</p>
 									)}
+									<p className="field-hint-sameday">
+										¿Necesitas cita para hoy? Las citas para el mismo día se agendan directamente por{" "}
+										<a
+											href="https://wa.me/573216646983?text=Hola%20Daniela%2C%20quiero%20agendar%20una%20cita%20para%20hoy"
+											target="_blank"
+											rel="noopener noreferrer"
+										>
+											WhatsApp
+										</a>
+										.
+									</p>
 								</div>
 							</div>
 
 							<div className="field">
-								<label>Horas disponibles</label>
+								<label htmlFor="time">Selecciona una hora *</label>
 								{loadingSlots ? (
 									<div className="slots-loading">
 										⏳ Consultando disponibilidad...
 									</div>
 								) : slotsError && !loadingSlots ? (
 									<div className="slots-error">{slotsError}</div>
-								) : slots.length > 0 ? (
+								) : allSlots.length > 0 ? (
 									<>
-										<div className="slots-grid">
-											{slots.map((slot) => (
-												<button
-													type="button"
-													key={slot}
-													className={`slot-btn ${form.time === slot ? "selected" : ""}`}
-													onClick={() => {
-														setForm((prev) => ({ ...prev, time: slot }));
-														setErrors((prev) => ({ ...prev, time: "" }));
-													}}
-												>
+										<select
+											id="time"
+											name="time"
+											value={form.time}
+											onChange={(e) => handleTimeSelect(e.target.value)}
+											onBlur={handleBlur}
+										>
+											<option value="">-- Selecciona una hora --</option>
+											{allSlots.map((slot) => (
+												<option key={slot} value={slot}>
 													{formatTimeSpanish(slot)}
-												</button>
+												</option>
 											))}
-										</div>
+										</select>
+										{selectedBusySlot && timeSuggestions && (
+											<div className="slot-suggestion">
+												⚠️ Este horario ya está agendado.
+												{timeSuggestions.above && timeSuggestions.below
+													? <> Te sugerimos: <button type="button" className="suggestion-link" onClick={() => handleTimeSelect(timeSuggestions.above)}>{formatTimeSpanish(timeSuggestions.above)}</button> o <button type="button" className="suggestion-link" onClick={() => handleTimeSelect(timeSuggestions.below)}>{formatTimeSpanish(timeSuggestions.below)}</button></>
+													: timeSuggestions.above
+														? <> La hora disponible más cercana: <button type="button" className="suggestion-link" onClick={() => handleTimeSelect(timeSuggestions.above)}>{formatTimeSpanish(timeSuggestions.above)}</button></>
+														: <> La hora disponible anterior más cercana: <button type="button" className="suggestion-link" onClick={() => handleTimeSelect(timeSuggestions.below)}>{formatTimeSpanish(timeSuggestions.below)}</button></>
+												}
+											</div>
+										)}
+										{selectedBusySlot && !timeSuggestions && (
+											<div className="slot-suggestion">
+												⚠️ Este horario ya está agendado. No hay más disponibilidad para este día.
+											</div>
+										)}
 										{(touched.time || errors.time) && errors.time && (
 											<p className="error-text">{errors.time}</p>
 										)}
@@ -567,17 +636,17 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 								) : form.date ? (
 									<div className="slots-empty">
 										{!loadingSlots &&
-											"No hay horas disponibles para esta fecha."}
+											"No hay agenda disponible para esta fecha."}
 									</div>
 								) : (
 									<div className="slots-empty">
-										Selecciona una fecha para ver las horas disponibles.
+										Selecciona una fecha para elegir una hora.
 									</div>
 								)}
 							</div>
 						</div>
 
-						{selectedService && form.date && form.time && (
+						{selectedService && form.date && form.time && !selectedBusySlot && (
 							<div className="form-step">
 								<div className="booking-summary">
 									<h4>Resumen de tu cita</h4>
@@ -631,7 +700,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 							type="submit"
 							className="btn btn-primary btn-lg"
 							style={{ width: "100%" }}
-							disabled={submitting}
+							disabled={submitting || selectedBusySlot}
 						>
 							{submitting ? "⏳ Enviando pre-agenda..." : "📅 Solicitar mi pre-agenda"}
 						</button>

@@ -16,6 +16,7 @@ const LAST_SLOT_HOUR = 22;
 /**
  * Consulta los slots disponibles para una fecha específica.
  * Llama a Apps Script → Google Calendar → retorna horas libres.
+ * USO INTERNO: solo para admin. El formulario público usa getAllSlotsWithAvailability().
  * @param {string} date - Fecha en formato YYYY-MM-DD
  * @returns {Promise<string[]>} - Array de horas disponibles "HH:00" (formato 24h)
  */
@@ -46,6 +47,43 @@ export async function getAvailability(date) {
   }
 
   return slots;
+}
+
+/**
+ * Genera todos los slots del horario laboral y marca cuáles están disponibles.
+ * Para uso del formulario público: NO revela la agenda completa de Daniela.
+ * @param {string} date - Fecha en formato YYYY-MM-DD
+ * @returns {Promise<{allSlots: string[], availableSet: Set<string>, diaCompleto: boolean}>}
+ */
+export async function getAllSlotsWithAvailability(date) {
+  const allSlots = [];
+  for (let h = OPENING_SLOT_HOUR; h <= LAST_SLOT_HOUR; h++) {
+    allSlots.push(`${String(h).padStart(2, '0')}:00`);
+  }
+
+  const url = `${APPS_SCRIPT_URL}?action=availability&fecha=${date}&key=${encodeURIComponent(API_KEY)}`;
+  const response = await fetch(url, { method: 'GET' });
+
+  if (!response.ok) {
+    throw new Error(`Error al consultar disponibilidad: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (data.error) {
+    throw new Error(data.error);
+  }
+
+  if (data.diaCompleto) {
+    return { allSlots, availableSet: new Set(), diaCompleto: true };
+  }
+
+  const availableSlots = Array.isArray(data.slots) ? data.slots : [];
+  return {
+    allSlots,
+    availableSet: new Set(availableSlots),
+    diaCompleto: false
+  };
 }
 
 /**
