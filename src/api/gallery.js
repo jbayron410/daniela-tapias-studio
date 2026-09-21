@@ -17,11 +17,8 @@ import { toCloudinaryUrl } from './cloudinary';
 const COLLECTION = 'gallery';
 const CONFIG_DOC = 'settings/gallery_config';
 
-const CLOUDINARY_CLOUD_NAME =
-  import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'hwzcg49k';
-
-const CLOUDINARY_UPLOAD_PRESET =
-  import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || 'daniela_gallery';
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 /**
  * Obtiene todos los items de la galería desde Firestore,

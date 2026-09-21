@@ -13,9 +13,11 @@ export default function Agendar() {
       <header className="standalone-header">
         <a href="/" className="standalone-logo">
           <img
-            src={toCloudinaryUrl("/logo-sin-letras.png")}
+            src={toCloudinaryUrl("/w_280,f_auto,q_auto/logo-sin-letras.png")}
             alt="Daniela Tapias Studio"
             className="standalone-logo-img"
+            width="70"
+            height="70"
           />
           <span>Daniela Tapias Studio</span>
         </a>

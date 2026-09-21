@@ -10,8 +10,10 @@ export default function Footer() {
 					<div>
 						<div className="footer-logo">
 							<img
-								src={toCloudinaryUrl("/logo-sin-fondo.png")}
+								src={toCloudinaryUrl("/w_160,f_auto,q_auto/logo-sin-fondo.png")}
 								alt="Daniela Tapias Studio"
+								width="80"
+								height="80"
 							/>
 						</div>
 						<p>

@@ -2,7 +2,8 @@ import { Helmet } from 'react-helmet-async';
 
 const SITE_NAME = 'Daniela Tapias Studio';
 const BASE_URL = 'https://www.danielatapias.com';
-const DEFAULT_IMAGE = 'https://res.cloudinary.com/hwzcg49k/image/upload/w_1200,h_630,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png';
+const CLOUDINARY_BASE = import.meta.env.VITE_CLOUDINARY_BASE_URL || import.meta.env.CLOUDINARY_BASE_URL;
+const DEFAULT_IMAGE = `${CLOUDINARY_BASE}/w_1200,h_630,c_fill,f_auto,q_auto/blazer-negro-todo-medio.png`;
 
 export default function SEO({
   title,

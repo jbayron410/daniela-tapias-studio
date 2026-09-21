@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   for (const key of [
     'VITE_APPS_SCRIPT_URL',
     'VITE_APPS_SCRIPT_KEY',
+    'VITE_CLOUDINARY_BASE_URL',
     'CLOUDINARY_BASE_URL',
     'VITE_FIREBASE_API_KEY',
     'VITE_FIREBASE_AUTH_DOMAIN',

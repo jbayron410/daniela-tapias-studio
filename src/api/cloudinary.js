@@ -4,8 +4,8 @@
 
 // Base de Cloudinary (cloud name) configurada en el .env
 const CLOUDINARY_BASE_URL =
-  import.meta.env.CLOUDINARY_BASE_URL ||
-  'https://res.cloudinary.com/hwzcg49k/image/upload';
+  import.meta.env.VITE_CLOUDINARY_BASE_URL ||
+  import.meta.env.CLOUDINARY_BASE_URL;
 
 /**
  * Cloudinary reemplaza los caracteres `[` y `]` por `_` en los public id.

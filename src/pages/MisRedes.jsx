@@ -70,9 +70,11 @@ export default function MisRedes() {
       <div className="linktree-card">
         <div className="linktree-avatar">
           <img
-            src={toCloudinaryUrl("/logo-sin-fondo.png")}
+            src={toCloudinaryUrl("/w_200,f_auto,q_auto/logo-sin-fondo.png")}
             alt="Daniela Tapias Studio"
             className="linktree-avatar-img"
+            width="100"
+            height="100"
           />
         </div>
         <h1 className="linktree-name">Daniela Tapias Studio</h1>

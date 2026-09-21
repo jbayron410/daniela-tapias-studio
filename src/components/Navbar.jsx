@@ -24,8 +24,10 @@ export default function Navbar({ onBook }) {
 			<div className="container">
 				<a href="#inicio" className="logo">
 					<img
-						src={toCloudinaryUrl("/logo-sin-letras.png")}
+						src={toCloudinaryUrl("/w_280,f_auto,q_auto/logo-sin-letras.png")}
 						alt="Daniela Tapias Studio"
+						width="70"
+						height="70"
 					/>
 				</a>
 
