@@ -1,6 +1,6 @@
 import { toCloudinaryUrl } from "../api/cloudinary";
 
-export default function Hero({ onBook }) {
+export default function Hero({ onBook, onExploreGallery }) {
 	return (
 		<section id="inicio" className="hero">
 			<div className="container">
@@ -22,7 +22,7 @@ export default function Hero({ onBook }) {
 							<button className="btn btn-primary btn-lg" onClick={onBook}>
 								Agenda tu cita
 							</button>
-							<a href="#galeria" className="btn btn-outline btn-lg">
+							<a href="#galeria" className="btn btn-outline btn-lg" onClick={onExploreGallery}>
 								Ver portafolio
 							</a>
 						</div>

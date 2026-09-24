@@ -1,0 +1,15 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Daniela Tapias Studio",
+    "identifier": "did:web:www.danielatapias.com"
+  },
+  "entries": [
+    {
+      "identifier": "urn:air:danielatapias.com:service:peinados",
+      "displayName": "Servicios de Peinados y Agendamiento",
+      "type": "text/markdown",
+      "url": "https://www.danielatapias.com/llms.txt"
+    }
+  ]
+}

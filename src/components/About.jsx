@@ -15,7 +15,7 @@ const FEATURES = [
 	{ icon: "🤍", text: "Atención personalizada" },
 ];
 
-export default function About() {
+export default function About({ onBook }) {
 	return (
 		<section id="sobre-mi" className="section section-alt">
 			<div className="container">
@@ -24,7 +24,7 @@ export default function About() {
 						{ABOUT_MEDIA.slice(0, 5).map((src, index) => (
 							<div className="media-item" key={src}>
 								{src.endsWith(".mp4") ? (
-									<video src={src} muted loop playsInline autoPlay />
+									<video src={src} muted loop playsInline autoPlay preload="none" />
 								) : (
 									<img
 										src={src}
@@ -60,7 +60,7 @@ export default function About() {
 								</div>
 							))}
 						</div>
-						<a href="#agendar" className="btn btn-primary">
+						<a href="#agendar" className="btn btn-primary" onClick={onBook}>
 							Agenda tu cita conmigo
 						</a>
 					</div>
