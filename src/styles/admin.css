@@ -236,8 +236,8 @@
 /* ============ Stats ============ */
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
   margin-bottom: 32px;
 }
 
@@ -879,6 +879,27 @@
 
 .action-confirm:hover {
   background: #c8e6c9;
+}
+
+.action-assign {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.action-assign:hover {
+  background: #fde68a;
+}
+
+.action-wa {
+  background: #e0f2fe;
+  color: #0284c7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.action-wa:hover {
+  background: #bae6fd;
 }
 
 .action-cancel {

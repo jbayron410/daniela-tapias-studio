@@ -771,81 +771,272 @@ button {
 }
 
 /* ============ Sobre / About ============ */
+.about-section {
+  position: relative;
+  overflow: hidden;
+}
+
 .about-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 56px;
   align-items: center;
 }
 
-.about-media {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+/* Showcase del Estudio (Columna Izquierda) */
+.about-showcase {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
-.about-media .media-item {
-  border-radius: var(--radius);
+.about-image-wrapper {
+  position: relative;
+  border-radius: 20px;
   overflow: hidden;
-  aspect-ratio: 3/4;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: var(--dark);
+  aspect-ratio: 16 / 10.2;
 }
 
-.about-media .media-item:first-child {
-  grid-row: span 2;
-}
-
-.about-media img,
-.about-media video {
+.about-studio-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s;
+  object-position: center;
+  display: block;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.about-media .media-item:hover img,
-.about-media .media-item:hover video {
-  transform: scale(1.05);
+.about-image-wrapper:hover .about-studio-img {
+  transform: scale(1.03);
 }
 
+/* Badges sobre la foto del estudio */
+.about-image-badge {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 15px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 30px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 2;
+  letter-spacing: 0.2px;
+}
+
+.about-image-badge.top-left {
+  top: 14px;
+  left: 14px;
+  background: rgba(20, 20, 20, 0.82);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.about-image-badge .badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.8);
+  display: inline-block;
+}
+
+.about-image-badge.bottom-right {
+  bottom: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--dark);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.about-image-badge.bottom-right svg {
+  color: #e53935;
+}
+
+/* Tarjeta flotante de experiencia */
+.about-studio-floating-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--white);
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+}
+
+.about-studio-floating-card .studio-card-icon {
+  font-size: 1.7rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.about-studio-floating-card .studio-card-text strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 2px;
+}
+
+.about-studio-floating-card .studio-card-text span {
+  display: block;
+  font-size: 12px;
+  color: var(--text-light);
+  line-height: 1.4;
+}
+
+/* Chips de comodidades */
+.about-studio-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.studio-perk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--dark-2);
+  background: rgba(0, 0, 0, 0.035);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.studio-perk .perk-bullet {
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+/* Contenido de Daniela (Columna Derecha) */
 .about-content .section-tag {
   text-align: left;
+  margin-bottom: 12px;
 }
 
 .about-content h2 {
-  font-size: 2.4rem;
-  margin-bottom: 20px;
+  font-size: 2.35rem;
+  margin-bottom: 18px;
+  line-height: 1.25;
+}
+
+.about-content .about-lead {
+  font-size: 1.05rem;
+  color: var(--dark);
+  line-height: 1.65;
+  margin-bottom: 14px;
 }
 
 .about-content p {
   color: var(--text-light);
-  margin-bottom: 20px;
+  line-height: 1.65;
+  margin-bottom: 16px;
+  font-size: 14.5px;
 }
 
+/* Tarjetas de características */
 .about-features {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin: 28px 0;
+  gap: 14px;
+  margin: 26px 0 28px;
 }
 
 .about-feature {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 14px 16px;
   background: var(--white);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.about-feature .icon {
-  font-size: 1.4rem;
+.about-feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: rgba(212, 175, 55, 0.35);
 }
 
-.about-feature span {
-  font-size: 13px;
+.about-feature-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f5f5f5, #ebebeb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--dark);
+  margin-top: 1px;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.about-feature:hover .about-feature-icon {
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #ffffff;
+}
+
+.about-feature-body h4 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dark);
+  font-family: var(--font-sans);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.about-feature-body p {
+  font-size: 12px;
+  color: var(--text-light);
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Botón y llamada a la acción */
+.about-action {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.btn-about {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  font-size: 14.5px;
   font-weight: 600;
 }
+
+.btn-about svg {
+  transition: transform 0.25s ease;
+}
+
+.btn-about:hover svg {
+  transform: translateX(4px);
+}
+
+.about-action-note {
+  font-size: 12.5px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
 
 /* ============ Agendamiento ============ */
 .booking-section {
@@ -1656,6 +1847,21 @@ button {
 
   .about-features {
     grid-template-columns: 1fr;
+  }
+
+  .about-action {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .btn-about {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .about-action-note {
+    text-align: center;
   }
 }
 

@@ -11,15 +11,26 @@ export async function fetchCitas() {
   return Array.isArray(data) ? data : [];
 }
 
-export function confirmCita(cita) {
+export function confirmCita(data) {
   return fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({
       key: API_KEY,
       action: 'confirm',
-      rowIndex: cita.rowIndex,
-      id: cita.ID
+      ...data
+    })
+  });
+}
+
+export function markCitaConfirmed(cita) {
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      key: API_KEY,
+      action: 'mark_confirmed',
+      rowIndex: cita.rowIndex
     })
   });
 }
@@ -27,12 +38,12 @@ export function confirmCita(cita) {
 export function cancelCita(cita) {
   return fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify({
       key: API_KEY,
       action: 'cancel',
       rowIndex: cita.rowIndex,
-      id: cita.ID
+      id: cita.ID || cita.id || cita.Id || cita['ID Evento'] || ''
     })
   });
 }

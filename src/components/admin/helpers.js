@@ -1,7 +1,8 @@
 const ESTADO_MAP = {
-  '0': { label: 'Pendiente', color: '#ff9800', bg: '#fff3e0' },
-  '1': { label: 'Confirmada', color: '#4caf50', bg: '#e8f5e9' },
-  '2': { label: 'Cancelada', color: '#ef5350', bg: '#fdeaea' }
+  '0': { label: 'Pre-agenda', color: '#b45309', bg: '#fef3c7' }, // Sin hora asignada
+  '3': { label: 'Agendada', color: '#1d4ed8', bg: '#dbeafe' },   // Con hora y en Calendar
+  '1': { label: 'Confirmada', color: '#15803d', bg: '#dcfce7' }, // Reconfirmada 1 día antes
+  '2': { label: 'Cancelada', color: '#b91c1c', bg: '#fee2e2' }   // Cancelada y borrada de Calendar
 };
 
 export function getEstado(estado) {

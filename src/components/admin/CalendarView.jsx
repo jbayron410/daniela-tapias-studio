@@ -5,9 +5,10 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { parseCitaDateTime, getEstado } from './helpers';
 
 const STATUS_COLORS = {
-  '0': { bg: '#ff9800', border: '#e68900' },
-  '1': { bg: '#4caf50', border: '#388e3c' },
-  '2': { bg: '#ef5350', border: '#d32f2f' }
+  '0': { bg: '#f59e0b', border: '#d97706' }, // Pre-agenda
+  '3': { bg: '#2563eb', border: '#1d4ed8' }, // Agendada en Calendar
+  '1': { bg: '#16a34a', border: '#15803d' }, // Confirmada
+  '2': { bg: '#dc2626', border: '#b91c1c' }  // Cancelada
 };
 
 function citasToEvents(citas) {

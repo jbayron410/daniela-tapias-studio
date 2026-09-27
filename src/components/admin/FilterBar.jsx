@@ -30,7 +30,8 @@ export default function FilterBar({
         <label>Estado</label>
         <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}>
           <option value="todos">Todos</option>
-          <option value="0">Sin Confirmar</option>
+          <option value="0">Pre-agendas (Sin hora)</option>
+          <option value="3">Agendadas (En Calendar)</option>
           <option value="1">Confirmadas</option>
           <option value="2">Canceladas</option>
         </select>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { fetchCitas, confirmCita, cancelCita } from '../../api/sheets';
+import { fetchCitas, confirmCita, markCitaConfirmed, cancelCita } from '../../api/sheets';
 import { getBlocks } from '../../api/n8n';
 import DashboardHeader from '../../components/admin/DashboardHeader';
 import StatsCards from '../../components/admin/StatsCards';
@@ -7,6 +7,7 @@ import FilterBar from '../../components/admin/FilterBar';
 import CitasTable from '../../components/admin/CitasTable';
 import CalendarView from '../../components/admin/CalendarView';
 import ConfirmModal from '../../components/admin/ConfirmModal';
+import ConfirmCitaModal from '../../components/admin/ConfirmCitaModal';
 import CitaDetailModal from '../../components/admin/CitaDetailModal';
 import AdminBookingModal from '../../components/admin/AdminBookingModal';
 import BlockDayModal from '../../components/admin/BlockDayModal';
@@ -26,6 +27,7 @@ export default function Dashboard() {
   const [orden, setOrden] = useState('asc');
   const [vista, setVista] = useState('lista');
   const [citaToCancel, setCitaToCancel] = useState(null);
+  const [citaToConfirm, setCitaToConfirm] = useState(null);
   const [citaDetail, setCitaDetail] = useState(null);
   const [showBooking, setShowBooking] = useState(false);
   const [showBlockDay, setShowBlockDay] = useState(false);
@@ -62,20 +64,57 @@ export default function Dashboard() {
     loadBloqueos();
   }, [loadBloqueos]);
 
+  // Deep-link desde WhatsApp: ?confirmar=ID o ?cita=ID
+  useEffect(() => {
+    if (citas.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get('confirmar') || params.get('cita');
+    if (!targetId) return;
+
+    const cleanTarget = targetId.trim().toLowerCase();
+    const found = citas.find((c) => {
+      const idVal = String(c.ID || c.id || c.Id || c['ID Evento'] || '').trim().toLowerCase();
+      if (idVal && (idVal === cleanTarget || idVal.includes(cleanTarget) || cleanTarget.includes(idVal))) {
+        return true;
+      }
+      if (String(c.rowIndex) === cleanTarget) return true;
+      if (c.WhatsApp && String(c.WhatsApp).includes(cleanTarget)) return true;
+      return Object.values(c).some((val) => typeof val === 'string' && val.trim().toLowerCase() === cleanTarget);
+    });
+
+    if (found) {
+      setCitaToConfirm(found);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [citas]);
+
   const handleConfirm = useCallback((cita) => {
+    setCitaDetail(null);
+    setCitaToConfirm(cita);
+  }, []);
+
+  const handleMarkConfirmed = useCallback((cita) => {
+    const prevEstado = cita['Estado Confirmación'];
     setCitas((prev) =>
       prev.map((c) =>
         c.rowIndex === cita.rowIndex ? { ...c, 'Estado Confirmación': '1' } : c
       )
     );
-    confirmCita(cita).catch(() => {
+    markCitaConfirmed(cita).catch(() => {
       setCitas((prev) =>
         prev.map((c) =>
-          c.rowIndex === cita.rowIndex ? { ...c, 'Estado Confirmación': cita['Estado Confirmación'] } : c
+          c.rowIndex === cita.rowIndex ? { ...c, 'Estado Confirmación': prevEstado } : c
         )
       );
     });
   }, []);
+
+  const handleConfirmSuccess = useCallback((updatedCita) => {
+    setCitas((prev) =>
+      prev.map((c) => (c.rowIndex === updatedCita.rowIndex ? updatedCita : c))
+    );
+    loadCitas();
+  }, [loadCitas]);
 
   const handleCancelConfirm = useCallback(() => {
     if (!citaToCancel) return;
@@ -211,6 +250,8 @@ export default function Dashboard() {
               ) : vista === 'lista' ? (
                 <CitasTable
                   citas={citasFiltradas}
+                  onAssignTime={handleConfirm}
+                  onMarkConfirmed={handleMarkConfirmed}
                   onConfirm={handleConfirm}
                   onCancel={(cita) => setCitaToCancel(cita)}
                   onEdit={handleEdit}
@@ -237,10 +278,20 @@ export default function Dashboard() {
         />
       )}
 
+      {citaToConfirm && (
+        <ConfirmCitaModal
+          cita={citaToConfirm}
+          onClose={() => setCitaToConfirm(null)}
+          onSuccess={handleConfirmSuccess}
+        />
+      )}
+
       {citaDetail && (
         <CitaDetailModal
           cita={citaDetail}
           onClose={() => setCitaDetail(null)}
+          onAssignTime={handleConfirm}
+          onMarkConfirmed={handleMarkConfirmed}
           onConfirm={handleConfirm}
           onCancel={(cita) => {
             setCitaDetail(null);

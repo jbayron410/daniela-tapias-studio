@@ -77,6 +77,7 @@ function citaToFormData(cita) {
     domicilio: cita['A domicilio'] === 'Sí',
     domicilioDetalles: cita['Detalles domicilio'] || '',
     requiereMaquillaje: cita['Requiere Maquillaje'] === 'Sí',
+    requierePrueba: cita['Requiere Prueba'] === 'Sí',
     date: dateStr,
     time: timeStr
   };
@@ -96,9 +97,11 @@ function buildPayload(form) {
     a_domicilio: form.domicilio,
     detalles_domicilio: form.domicilio ? form.domicilioDetalles.trim() : 'NA',
     requiere_maquillaje: form.requiereMaquillaje,
+    requiere_prueba: form.requierePrueba,
     notas: form.notes.trim() || 'Sin notas adicionales',
     fecha_inicio: startISO,
-    fecha_fin: endISO
+    fecha_fin: endISO,
+    fecha: form.date
   };
 }
 
@@ -113,6 +116,7 @@ function hasFormChanged(original, current) {
     original.domicilio !== current.domicilio ||
     original.domicilioDetalles !== current.domicilioDetalles ||
     original.requiereMaquillaje !== current.requiereMaquillaje ||
+    original.requierePrueba !== current.requierePrueba ||
     original.date !== current.date ||
     original.time !== current.time
   );
@@ -127,6 +131,7 @@ const emptyForm = {
   domicilio: false,
   domicilioDetalles: '',
   requiereMaquillaje: false,
+  requierePrueba: false,
   date: '',
   time: ''
 };
@@ -322,6 +327,17 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
                   onChange={handleChange}
                 />
                 Requiere maquillaje
+              </label>
+            </div>
+            <div className="modal-field">
+              <label className="admin-checkbox-label">
+                <input
+                  type="checkbox"
+                  name="requierePrueba"
+                  checked={form.requierePrueba}
+                  onChange={handleChange}
+                />
+                👰 Requiere prueba de peinado (días de semana)
               </label>
             </div>
           </div>

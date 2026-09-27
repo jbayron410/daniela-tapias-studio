@@ -1,12 +1,14 @@
 export default function StatsCards({ citas }) {
   const total = citas.length;
-  const pendientes = citas.filter((c) => String(c['Estado Confirmación']) === '0').length;
+  const preagendas = citas.filter((c) => String(c['Estado Confirmación']) === '0').length;
+  const agendadas = citas.filter((c) => String(c['Estado Confirmación']) === '3').length;
   const confirmadas = citas.filter((c) => String(c['Estado Confirmación']) === '1').length;
   const canceladas = citas.filter((c) => String(c['Estado Confirmación']) === '2').length;
 
   const stats = [
     { icon: '📅', number: total, label: 'Total Citas' },
-    { icon: '⏳', number: pendientes, label: 'Sin Confirmar' },
+    { icon: '⏳', number: preagendas, label: 'Pre-agendas' },
+    { icon: '📆', number: agendadas, label: 'Agendadas' },
     { icon: '✅', number: confirmadas, label: 'Confirmadas' },
     { icon: '❌', number: canceladas, label: 'Canceladas' }
   ];

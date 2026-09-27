@@ -38,8 +38,8 @@ function BookingFallback() {
           <span className="section-tag">Agenda tu cita</span>
           <h2>Reserva en línea</h2>
           <p>
-            Selecciona tu servicio, la fecha y hora. Tu solicitud será una
-            <strong> pre-agenda</strong>: Daniela te escribirá por WhatsApp para confirmar tu cita.
+            Selecciona tu servicio y la fecha deseada. Tu solicitud será una
+            <strong> pre-agenda</strong>: Daniela te escribirá por WhatsApp para coordinar la hora y confirmar tu cita.
           </p>
         </div>
         <div className="gallery-loading">
