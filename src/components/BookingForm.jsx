@@ -438,6 +438,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                     id="date"
                     name="date"
                     type="date"
+                    className="booking-date-input"
                     min={minDate}
                     max={maxDate}
                     value={form.date}

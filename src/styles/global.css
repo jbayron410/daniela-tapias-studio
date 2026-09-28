@@ -1240,7 +1240,12 @@ button {
 .field input,
 .field select,
 .field textarea {
+  display: block;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
   padding: 12px 14px;
   border: 2px solid #eee;
   border-radius: var(--radius-sm);
@@ -1356,18 +1361,69 @@ button {
   margin-top: 4px;
 }
 
-/* Calendario fecha */
+/* Calendario fecha y compatibilidad específica para iOS WebKit */
 .date-picker {
   margin-bottom: 16px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
-.date-picker input[type="date"] {
+.date-picker .field {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.date-picker input[type="date"],
+.field input[type="date"],
+.booking-date-input {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box !important;
+  -webkit-box-sizing: border-box !important;
+  margin: 0;
   padding: 12px 14px;
   border: 2px solid #eee;
   border-radius: var(--radius-sm);
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 16px; /* 16px previene el zoom automático brusco de iOS Safari */
+  color: var(--text);
+  background-color: var(--white);
+  min-height: 48px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Alineación consistente del texto de la fecha en WebKit (iOS Safari) */
+.date-picker input[type="date"]::-webkit-date-and-time-value,
+.field input[type="date"]::-webkit-date-and-time-value,
+.booking-date-input::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  min-height: 1.3em;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Indicador de calendario en navegadores WebKit/Blink */
+.date-picker input[type="date"]::-webkit-calendar-picker-indicator,
+.field input[type="date"]::-webkit-calendar-picker-indicator,
+.booking-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.date-picker input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.field input[type="date"]::-webkit-calendar-picker-indicator:hover,
+.booking-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
 }
 
 /* Slots de hora */
