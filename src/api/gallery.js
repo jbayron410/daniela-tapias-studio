@@ -38,6 +38,7 @@ export async function fetchGallery() {
       id: docSnap.id,
       url: toCloudinaryUrl(data.cloudinaryUrl),
       cloudinaryUrl: data.cloudinaryUrl,
+      publicId: data.publicId || null,
       isVideo: data.isVideo || false,
       order: data.order || 0,
     });

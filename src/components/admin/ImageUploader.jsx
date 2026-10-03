@@ -46,6 +46,7 @@ export default function ImageUploader({ onUploaded, onCancel, initialCategory })
 
       await addGalleryImage({
         cloudinaryUrl: result.cloudinaryUrl,
+        publicId: result.publicId,
         category,
         isVideo: result.isVideo,
         order: Date.now(),
