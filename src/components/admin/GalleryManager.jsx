@@ -28,7 +28,15 @@ export default function GalleryManager() {
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [activeDragIndex, setActiveDragIndex] = useState(null);
+  const [overIndex, setOverIndex] = useState(null);
   const saveTimeoutRef = useRef(null);
+  const pointerDragRef = useRef({
+    startIndex: null,
+    currentTargetIndex: null,
+    pointerId: null,
+    isDragging: false,
+  });
 
   useEffect(() => {
     setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
@@ -120,6 +128,75 @@ export default function GalleryManager() {
     });
 
     scheduleSaveOrder(updatedWithOrder);
+  };
+
+  const handlePointerDown = (e, index) => {
+    if (e.button !== undefined && e.button !== 0) return;
+
+    const pointerId = e.pointerId;
+    const handleEl = e.currentTarget;
+
+    try {
+      handleEl.setPointerCapture(pointerId);
+    } catch (_) {}
+
+    pointerDragRef.current = {
+      startIndex: index,
+      currentTargetIndex: index,
+      pointerId,
+      isDragging: true,
+    };
+
+    setActiveDragIndex(index);
+    setOverIndex(index);
+
+    const onPointerMove = (moveEvent) => {
+      if (!pointerDragRef.current.isDragging) return;
+      const element = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+      if (!element) return;
+      const card = element.closest('[data-gallery-index]');
+      if (card) {
+        const targetIdx = Number(card.getAttribute('data-gallery-index'));
+        if (!isNaN(targetIdx)) {
+          pointerDragRef.current.currentTargetIndex = targetIdx;
+          setOverIndex(targetIdx);
+        }
+      }
+    };
+
+    const onPointerUp = () => {
+      try {
+        handleEl.releasePointerCapture(pointerId);
+      } catch (_) {}
+
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+
+      const { startIndex, currentTargetIndex, isDragging } = pointerDragRef.current;
+      pointerDragRef.current = {
+        startIndex: null,
+        currentTargetIndex: null,
+        pointerId: null,
+        isDragging: false,
+      };
+
+      setActiveDragIndex(null);
+      setOverIndex(null);
+
+      if (
+        isDragging &&
+        startIndex !== null &&
+        currentTargetIndex !== null &&
+        startIndex !== currentTargetIndex
+      ) {
+        moveItem(startIndex, currentTargetIndex);
+      }
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
   };
 
   const handleDragStart = (e, index) => {
@@ -290,7 +367,7 @@ export default function GalleryManager() {
         ))}
       </div>
       <p className="gallery-hint">
-        Usa las flechas para ordenar las fotos (en computador también puedes arrastrarlas) • Doble clic en un título para editarlo
+        Usa el icono ⠿ para arrastrar o las flechas para mover • Doble clic en un título para editarlo
       </p>
 
       {loading ? (
@@ -313,9 +390,15 @@ export default function GalleryManager() {
           {filteredItems.map((item, index) => (
             <div
               key={item.id}
+              data-gallery-index={index}
               className={`gallery-manager-item ${!item.active ? 'inactive' : ''} ${
-                draggedIndex === index ? 'dragging' : ''
-              } ${dragOverIndex === index ? 'drag-over' : ''}`}
+                activeDragIndex === index || draggedIndex === index ? 'dragging' : ''
+              } ${
+                (overIndex === index && activeDragIndex !== null && activeDragIndex !== index) ||
+                (dragOverIndex === index && draggedIndex !== null && draggedIndex !== index)
+                  ? 'drag-over'
+                  : ''
+              }`}
               draggable={!isTouchDevice}
               onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
@@ -325,6 +408,14 @@ export default function GalleryManager() {
               <div className="gallery-manager-thumb">
                 <div className={`gallery-position-badge ${index === 0 ? 'is-cover' : ''}`}>
                   #{index + 1} {index === 0 && <span className="cover-text">Portada</span>}
+                </div>
+                <div
+                  className="gallery-drag-handle"
+                  onPointerDown={(e) => handlePointerDown(e, index)}
+                  title="Arrastrar para mover posición"
+                  aria-label="Arrastrar"
+                >
+                  ⠿
                 </div>
                 {item.isVideo ? (
                   <video src={item.url} muted preload="metadata" />
