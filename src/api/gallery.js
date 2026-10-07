@@ -10,6 +10,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  writeBatch,
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { toCloudinaryUrl } from './cloudinary';
@@ -21,9 +22,8 @@ const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
 /**
- * Obtiene todos los items de la galería desde Firestore,
- * agrupados por categoría y ordenados por `order`.
- * @returns {Object} { sociales: [...urls], novias: [...urls], ... }
+ * Fetches all gallery items from Firestore, grouped by category and sorted by order.
+ * @returns {Promise<Object>} { categoryId: [{id, url, isVideo, order, ...}], ... }
  */
 export async function fetchGallery() {
   const q = query(collection(db, COLLECTION), orderBy('order', 'asc'));
@@ -40,16 +40,21 @@ export async function fetchGallery() {
       cloudinaryUrl: data.cloudinaryUrl,
       publicId: data.publicId || null,
       isVideo: data.isVideo || false,
-      order: data.order || 0,
+      order: data.order ?? 0,
     });
+  });
+
+  // Ensure deterministic ascending order for every category
+  Object.keys(grouped).forEach((cat) => {
+    grouped[cat].sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
   });
 
   return grouped;
 }
 
 /**
- * Obtiene TODOS los items (activos e inactivos) para el admin.
- * @returns {Array} Lista de items con id y todos sus campos
+ * Fetches ALL items (both active and inactive) for the admin dashboard.
+ * @returns {Promise<Array>} List of all items with id and properties
  */
 export async function fetchAllGalleryItems() {
   const q = query(collection(db, COLLECTION), orderBy('order', 'asc'));
@@ -61,6 +66,7 @@ export async function fetchAllGalleryItems() {
     items.push({
       id: docSnap.id,
       ...data,
+      order: data.order ?? 0,
       url: toCloudinaryUrl(data.cloudinaryUrl),
     });
   });
@@ -69,9 +75,9 @@ export async function fetchAllGalleryItems() {
 }
 
 /**
- * Agrega un nuevo item a la galería.
+ * Adds a new item to the gallery.
  * @param {Object} data - { cloudinaryUrl, category, isVideo, order }
- * @returns {string} ID del documento creado
+ * @returns {Promise<string>} Created document ID
  */
 export async function addGalleryImage(data) {
   const docRef = await addDoc(collection(db, COLLECTION), {
@@ -83,9 +89,9 @@ export async function addGalleryImage(data) {
 }
 
 /**
- * Actualiza un item de la galería.
- * @param {string} id - ID del documento
- * @param {Object} data - Campos a actualizar
+ * Updates a single gallery item.
+ * @param {string} id - Document ID
+ * @param {Object} data - Fields to update
  */
 export async function updateGalleryImage(id, data) {
   const ref = doc(db, COLLECTION, id);
@@ -93,9 +99,27 @@ export async function updateGalleryImage(id, data) {
 }
 
 /**
- * Elimina un item de la galería de Firestore.
- * La imagen permanece en Cloudinary (soft delete).
- * @param {string} id - ID del documento
+ * Updates the display order for multiple gallery items in Firestore using batch write.
+ * @param {Array<{id: string, order: number}>} orderedItems - Items with updated order indices
+ */
+export async function updateGalleryOrder(orderedItems) {
+  if (!orderedItems || orderedItems.length === 0) return;
+
+  const BATCH_SIZE = 450;
+  for (let i = 0; i < orderedItems.length; i += BATCH_SIZE) {
+    const chunk = orderedItems.slice(i, i + BATCH_SIZE);
+    const batch = writeBatch(db);
+    chunk.forEach((item) => {
+      const ref = doc(db, COLLECTION, item.id);
+      batch.update(ref, { order: item.order });
+    });
+    await batch.commit();
+  }
+}
+
+/**
+ * Deletes a gallery item document from Firestore.
+ * @param {string} id - Document ID
  */
 export async function deleteGalleryImage(id) {
   const ref = doc(db, COLLECTION, id);

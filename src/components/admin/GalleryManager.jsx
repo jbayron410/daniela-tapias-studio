@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   fetchAllGalleryItems,
   updateGalleryImage,
+  updateGalleryOrder,
   deleteGalleryImage,
   fetchCategoryVisibility,
   updateCategoryVisibility,
@@ -22,6 +23,24 @@ export default function GalleryManager() {
   const [catLabels, setCatLabels] = useState({});
   const [editingLabelId, setEditingLabelId] = useState(null);
   const [editingLabelValue, setEditingLabelValue] = useState('');
+  const [savingOrder, setSavingOrder] = useState(false);
+  const [saveOrderSuccess, setSaveOrderSuccess] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const saveTimeoutRef = useRef(null);
+
+  useEffect(() => {
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -46,7 +65,10 @@ export default function GalleryManager() {
     loadItems();
   }, [loadItems]);
 
-  const filteredItems = items.filter((item) => item.category === activeCategory);
+  const filteredItems = items
+    .filter((item) => item.category === activeCategory)
+    .sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
   const categoryCounts = CATEGORIES.map((cat) => ({
     ...cat,
     label: catLabels[cat.id] || cat.label,
@@ -54,6 +76,82 @@ export default function GalleryManager() {
     activeCount: items.filter((i) => i.category === cat.id && i.active).length,
     enabled: catVisibility[cat.id] === undefined ? true : catVisibility[cat.id],
   }));
+
+  const scheduleSaveOrder = useCallback((orderedItems) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    setSavingOrder(true);
+    setSaveOrderSuccess(false);
+
+    saveTimeoutRef.current = setTimeout(async () => {
+      try {
+        await updateGalleryOrder(orderedItems);
+        setSavingOrder(false);
+        setSaveOrderSuccess(true);
+        setTimeout(() => setSaveOrderSuccess(false), 2500);
+      } catch (err) {
+        setSavingOrder(false);
+        setError(err.message || 'Error al guardar el nuevo orden');
+      }
+    }, 600);
+  }, []);
+
+  const moveItem = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex || toIndex < 0 || toIndex >= filteredItems.length) {
+      return;
+    }
+
+    const reorderedList = [...filteredItems];
+    const [movedItem] = reorderedList.splice(fromIndex, 1);
+    reorderedList.splice(toIndex, 0, movedItem);
+
+    // Normalize order index
+    const updatedWithOrder = reorderedList.map((item, idx) => ({
+      ...item,
+      order: idx + 1,
+    }));
+
+    setItems((prevItems) => {
+      const orderMap = new Map(updatedWithOrder.map((it) => [it.id, it.order]));
+      return prevItems.map((it) =>
+        orderMap.has(it.id) ? { ...it, order: orderMap.get(it.id) } : it
+      );
+    });
+
+    scheduleSaveOrder(updatedWithOrder);
+  };
+
+  const handleDragStart = (e, index) => {
+    if (isTouchDevice) return;
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const handleDragOver = (e, index) => {
+    if (isTouchDevice) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e, targetIndex) => {
+    if (isTouchDevice) return;
+    e.preventDefault();
+    if (draggedIndex !== null && draggedIndex !== targetIndex) {
+      moveItem(draggedIndex, targetIndex);
+    }
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
 
   const handleStartEditLabel = (catId, currentLabel) => {
     setEditingLabelId(catId);
@@ -127,7 +225,15 @@ export default function GalleryManager() {
   return (
     <div className="gallery-manager">
       <div className="gallery-manager-header">
-        <h2>Galería</h2>
+        <div className="gallery-header-info">
+          <h2>Galería</h2>
+          {savingOrder && (
+            <span className="gallery-order-status saving">Guardando orden...</span>
+          )}
+          {saveOrderSuccess && (
+            <span className="gallery-order-status saved">✓ Orden guardado</span>
+          )}
+        </div>
         <button
           className="admin-action-btn admin-action-primary"
           onClick={() => setShowUploader(true)}
@@ -183,7 +289,9 @@ export default function GalleryManager() {
           </div>
         ))}
       </div>
-      <p className="gallery-hint">Doble clic en un título para editarlo</p>
+      <p className="gallery-hint">
+        Usa las flechas para ordenar las fotos (en computador también puedes arrastrarlas) • Doble clic en un título para editarlo
+      </p>
 
       {loading ? (
         <div className="admin-loading">
@@ -202,12 +310,22 @@ export default function GalleryManager() {
         </div>
       ) : (
         <div className="gallery-manager-grid">
-          {filteredItems.map((item) => (
+          {filteredItems.map((item, index) => (
             <div
               key={item.id}
-              className={`gallery-manager-item ${!item.active ? 'inactive' : ''}`}
+              className={`gallery-manager-item ${!item.active ? 'inactive' : ''} ${
+                draggedIndex === index ? 'dragging' : ''
+              } ${dragOverIndex === index ? 'drag-over' : ''}`}
+              draggable={!isTouchDevice}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              onDrop={(e) => handleDrop(e, index)}
             >
               <div className="gallery-manager-thumb">
+                <div className={`gallery-position-badge ${index === 0 ? 'is-cover' : ''}`}>
+                  #{index + 1} {index === 0 && <span className="cover-text">Portada</span>}
+                </div>
                 {item.isVideo ? (
                   <video src={item.url} muted preload="metadata" />
                 ) : (
@@ -216,6 +334,53 @@ export default function GalleryManager() {
                 {!item.active && (
                   <div className="gallery-manager-overlay">OCULTA</div>
                 )}
+              </div>
+
+              {/* Touch-first Reordering Toolbar (Ideal for iPhone & Mobile) */}
+              <div className="gallery-manager-order-bar">
+                <button
+                  type="button"
+                  className="order-btn"
+                  onClick={() => moveItem(index, 0)}
+                  disabled={index === 0}
+                  title="Mover al inicio (portada)"
+                  aria-label="Mover al inicio"
+                >
+                  ⏮
+                </button>
+                <button
+                  type="button"
+                  className="order-btn"
+                  onClick={() => moveItem(index, index - 1)}
+                  disabled={index === 0}
+                  title="Mover una posición atrás"
+                  aria-label="Mover una posición atrás"
+                >
+                  ◀
+                </button>
+                <span className="order-indicator" title="Posición actual">
+                  {index + 1} / {filteredItems.length}
+                </span>
+                <button
+                  type="button"
+                  className="order-btn"
+                  onClick={() => moveItem(index, index + 1)}
+                  disabled={index === filteredItems.length - 1}
+                  title="Mover una posición adelante"
+                  aria-label="Mover una posición adelante"
+                >
+                  ▶
+                </button>
+                <button
+                  type="button"
+                  className="order-btn"
+                  onClick={() => moveItem(index, filteredItems.length - 1)}
+                  disabled={index === filteredItems.length - 1}
+                  title="Mover al final"
+                  aria-label="Mover al final"
+                >
+                  ⏭
+                </button>
               </div>
 
               <div className="gallery-manager-controls">
