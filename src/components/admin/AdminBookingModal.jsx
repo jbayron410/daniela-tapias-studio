@@ -44,7 +44,10 @@ function serviceNameToId(name) {
   if (!name) return '';
   const lower = name.toLowerCase();
   const match = SERVICES.find((s) => s.name.toLowerCase() === lower);
-  return match ? match.id : '';
+  if (match) return match.id;
+  if (lower.includes('personaliz')) return 'acompanamiento';
+  if (lower.includes('acompaña') || lower.includes('acompana')) return 'acompanamiento';
+  return '';
 }
 
 function citaToFormData(cita) {
@@ -85,9 +88,11 @@ function citaToFormData(cita) {
 
 function buildPayload(form) {
   const service = SERVICES.find((s) => s.id === form.serviceId);
-  const maquillajeCost = form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
-  const totalPrice = service.price + maquillajeCost;
-  const { startISO, endISO } = toEventISO(form.date, form.time, service.duration);
+  const isAccompaniment = form.serviceId === 'acompanamiento';
+  const maquillajeCost = !isAccompaniment && form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
+  const basePrice = (service && service.price) || 0;
+  const totalPrice = basePrice + maquillajeCost;
+  const { startISO, endISO } = toEventISO(form.date, form.time, (service && service.duration) || 60);
   return {
     servicio: service.name,
     precio: totalPrice,
@@ -96,7 +101,7 @@ function buildPayload(form) {
     email: form.email.trim() || 'sinCorreo@ejemplo.com',
     a_domicilio: form.domicilio,
     detalles_domicilio: form.domicilio ? form.domicilioDetalles.trim() : 'NA',
-    requiere_maquillaje: form.requiereMaquillaje,
+    requiere_maquillaje: isAccompaniment ? false : form.requiereMaquillaje,
     requiere_prueba: form.requierePrueba,
     notas: form.notes.trim() || 'Sin notas adicionales',
     fecha_inicio: startISO,
@@ -258,11 +263,16 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
                 type="button"
                 key={s.id}
                 className={`admin-service-option ${form.serviceId === s.id ? 'selected' : ''}`}
-                onClick={() => setForm((prev) => ({ ...prev, serviceId: s.id }))}
+                onClick={() => setForm((prev) => ({
+                  ...prev,
+                  serviceId: s.id,
+                  requiereMaquillaje: s.id === 'acompanamiento' ? false : prev.requiereMaquillaje
+                }))}
               >
-                <span className="icon">{s.icon}</span>
                 <span className="name">{s.name}</span>
-                <span className="price">{formatPrice(s.price)}</span>
+                {s.price ? (
+                  <span className="price">{formatPrice(s.price)}</span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -318,17 +328,19 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
                 A domicilio
               </label>
             </div>
-            <div className="modal-field">
-              <label className="admin-checkbox-label">
-                <input
-                  type="checkbox"
-                  name="requiereMaquillaje"
-                  checked={form.requiereMaquillaje}
-                  onChange={handleChange}
-                />
-                Requiere maquillaje
-              </label>
-            </div>
+            {form.serviceId !== 'acompanamiento' && (
+              <div className="modal-field">
+                <label className="admin-checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="requiereMaquillaje"
+                    checked={form.requiereMaquillaje}
+                    onChange={handleChange}
+                  />
+                  Requiere maquillaje
+                </label>
+              </div>
+            )}
             <div className="modal-field">
               <label className="admin-checkbox-label">
                 <input
@@ -409,7 +421,7 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
               <h4>Resumen</h4>
               <div className="summary-row">
                 <span className="label">Servicio</span>
-                <span>{selectedService.icon} {selectedService.name}</span>
+                <span>{selectedService.name}</span>
               </div>
               <div className="summary-row">
                 <span className="label">Clienta</span>
@@ -435,10 +447,12 @@ export default function AdminBookingModal({ onClose, onSuccess, initialData, isE
                   <span>{formatPrice(MAQUILLAJE_PRICE)}</span>
                 </div>
               )}
-              <div className="summary-row total">
-                <span className="label">Total aprox.</span>
-                <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
-              </div>
+              {selectedService.price ? (
+                <div className="summary-row total">
+                  <span className="label">Total aprox.</span>
+                  <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
+                </div>
+              ) : null}
             </div>
           )}
 

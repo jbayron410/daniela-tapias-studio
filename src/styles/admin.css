@@ -375,6 +375,11 @@
   cursor: pointer;
   background: var(--white);
   font-family: var(--font-sans);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
 }
 
 .admin-service-option:hover {
@@ -386,16 +391,11 @@
   background: var(--primary-light);
 }
 
-.admin-service-option .icon {
-  font-size: 1.4rem;
-  display: block;
-  margin-bottom: 4px;
-}
-
 .admin-service-option .name {
   font-weight: 600;
   font-size: 13px;
   display: block;
+  margin-bottom: 2px;
 }
 
 .admin-service-option .price {

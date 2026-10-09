@@ -6,7 +6,6 @@ export const SERVICES = [
 	{
 		id: "sociales",
 		name: "Sociales",
-		icon: "✨",
 		description:
 			"Peinados elegantes y modernos para eventos sociales, grados, celebraciones y ocasiones especiales.",
 		price: 60000,
@@ -20,7 +19,6 @@ export const SERVICES = [
 	{
 		id: "novias",
 		name: "Novias",
-		icon: "👰",
 		description:
 			"Peinados espectaculares para tu gran día. Prueba previa y asesoría personalizada incluida.",
 		price: 100000,
@@ -35,7 +33,6 @@ export const SERVICES = [
 	{
 		id: "quinceañeras",
 		name: "Quinceañeras",
-		icon: "🎀",
 		description: "Peinados de ensueño para celebrar tus 15 años como mereces.",
 		price: 100000,
 		duration: 60,
@@ -46,17 +43,16 @@ export const SERVICES = [
 		],
 	},
 	{
-		id: "personalizado",
-		name: "Personalizados",
-		icon: "💖",
+		id: "acompanamiento",
+		name: "Acompañamiento",
 		description:
-			"¿Necesitas algo especial? Elige esta opción para peinados a medida o si requieres servicio a domicilio.",
-		price: 60000,
+			"Servicio exclusivo para maquilladoras que necesitan peinadora profesional para sus clientas en eventos y producciones.",
+		price: null,
 		duration: 60,
 		includes: [
-			"Peinado a tu medida",
-			"Consulta personalizada",
-			"Opción a domicilio disponible",
+			"Peinados para tus clientas",
+			"Coordinación y puntualidad",
+			"Productos y técnicas profesionales",
 		],
 	},
 ];

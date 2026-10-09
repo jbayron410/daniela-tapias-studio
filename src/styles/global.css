@@ -1190,6 +1190,11 @@ button {
   text-align: center;
   transition: all 0.3s;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 64px;
 }
 
 .service-option:hover {
@@ -1201,16 +1206,11 @@ button {
   background: var(--primary-light);
 }
 
-.service-option .icon {
-  font-size: 1.6rem;
-  display: block;
-  margin-bottom: 4px;
-}
-
 .service-option .name {
   font-weight: 600;
   font-size: 14px;
   display: block;
+  margin-bottom: 2px;
 }
 
 .service-option .price {

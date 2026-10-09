@@ -66,6 +66,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
       setForm((prev) => ({
         ...prev,
         serviceId: preselectService.id,
+        requiereMaquillaje: preselectService.id === 'acompanamiento' ? false : prev.requiereMaquillaje,
         requierePrueba: isServiceWithPrueba(preselectService.id) ? prev.requierePrueba : false
       }));
       onResetPreselect();
@@ -138,8 +139,10 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
     try {
       const selectedService = SERVICES.find((s) => s.id === form.serviceId);
-      const maquillajeCost = form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
-      const totalPrice = selectedService.price + maquillajeCost;
+      const isAccompaniment = form.serviceId === 'acompanamiento';
+      const maquillajeCost = !isAccompaniment && form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0;
+      const basePrice = (selectedService && selectedService.price) || 0;
+      const totalPrice = basePrice + maquillajeCost;
 
       const bookingPayload = {
         servicio: selectedService.name,
@@ -149,7 +152,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
         email: form.email.trim() || 'sinCorreo@ejemplo.com',
         a_domicilio: form.domicilio,
         detalles_domicilio: form.domicilio ? form.domicilioDetalles.trim() : 'NA',
-        requiere_maquillaje: form.requiereMaquillaje,
+        requiere_maquillaje: isAccompaniment ? false : form.requiereMaquillaje,
         requiere_prueba: isServiceWithPrueba(form.serviceId) ? form.requierePrueba : false,
         notas: form.notes.trim() || 'Sin notas adicionales',
         fecha: form.date
@@ -254,14 +257,16 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                       setForm((prev) => ({
                         ...prev,
                         serviceId: service.id,
+                        requiereMaquillaje: service.id === 'acompanamiento' ? false : prev.requiereMaquillaje,
                         requierePrueba: isServiceWithPrueba(service.id) ? prev.requierePrueba : false
                       }));
                       setErrors((prev) => ({ ...prev, serviceId: '' }));
                     }}
                   >
-                    <span className="icon">{service.icon}</span>
                     <span className="name">{service.name}</span>
-                    <span className="price">{formatPrice(service.price)}</span>
+                    {service.price ? (
+                      <span className="price">{formatPrice(service.price)}</span>
+                    ) : null}
                   </button>
                 ))}
               </div>
@@ -378,18 +383,20 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                 </div>
               )}
 
-              <div className="field checkbox">
-                <input
-                  id="requiereMaquillaje"
-                  name="requiereMaquillaje"
-                  type="checkbox"
-                  checked={form.requiereMaquillaje}
-                  onChange={handleChange}
-                />
-                <label htmlFor="requiereMaquillaje">
-                  Requiere maquillaje ({formatPrice(MAQUILLAJE_PRICE)})
-                </label>
-              </div>
+              {form.serviceId !== 'acompanamiento' && (
+                <div className="field checkbox">
+                  <input
+                    id="requiereMaquillaje"
+                    name="requiereMaquillaje"
+                    type="checkbox"
+                    checked={form.requiereMaquillaje}
+                    onChange={handleChange}
+                  />
+                  <label htmlFor="requiereMaquillaje">
+                    Requiere maquillaje ({formatPrice(MAQUILLAJE_PRICE)})
+                  </label>
+                </div>
+              )}
 
               {/* Opción de prueba para Novias y Quinceañeras */}
               {showPruebaOption && (
@@ -418,7 +425,11 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                 <textarea
                   id="notes"
                   name="notes"
-                  placeholder="Ej: estilo que deseas, referencias, evento, etc."
+                  placeholder={
+                    form.serviceId === 'acompanamiento'
+                      ? 'Ej: Nombre de tu estudio o marca, cantidad estimada de clientas, tipo de evento o producción...'
+                      : 'Ej: estilo que deseas, referencias, evento, etc.'
+                  }
                   value={form.notes}
                   onChange={handleChange}
                 />
@@ -470,9 +481,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                   <h4>Resumen de tu pre-agenda</h4>
                   <div className="summary-row">
                     <span className="label">Servicio</span>
-                    <span>
-                      {selectedService.icon} {selectedService.name}
-                    </span>
+                    <span>{selectedService.name}</span>
                   </div>
                   <div className="summary-row">
                     <span className="label">Fecha deseada</span>
@@ -506,12 +515,16 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                       <span>{formatPrice(MAQUILLAJE_PRICE)}</span>
                     </div>
                   )}
-                  <div className="summary-row total">
-                    <span className="label">Total estimado</span>
-                    <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
-                  </div>
+                  {selectedService.price ? (
+                    <div className="summary-row total">
+                      <span className="label">Total estimado</span>
+                      <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
+                    </div>
+                  ) : null}
                   <p className="summary-note">
-                    {form.domicilio
+                    {form.serviceId === 'acompanamiento'
+                      ? 'Al ser un servicio en alianza con maquilladoras, la coordinación de tiempos y tarifa se realiza directamente por WhatsApp.'
+                      : form.domicilio
                       ? 'El costo del desplazamiento y la hora exacta serán coordinados directamente contigo por WhatsApp.'
                       : 'Daniela se comunicará contigo por WhatsApp para confirmar la hora exacta de inicio.'}
                   </p>
@@ -551,9 +564,15 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                         💇‍♀️ <strong>Prueba de peinado:</strong> Recuerda que la prueba previa se coordina para un día de semana (lunes a viernes).
                       </div>
                     )}
-                    <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
-                      El valor mostrado es una estimación. El valor final se confirmará al definir particularidades del peinado o desplazamiento.
-                    </p>
+                    {confirmedBooking.precio > 0 ? (
+                      <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
+                        El valor mostrado es una estimación. El valor final se confirmará al definir particularidades del peinado o desplazamiento.
+                      </p>
+                    ) : (
+                      <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
+                        Al ser un servicio de coordinación entre profesionales, los detalles y tarifa se definirán directamente por WhatsApp.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

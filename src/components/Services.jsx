@@ -30,13 +30,14 @@ export default function Services({ onSelect }) {
               {service.id === 'novias' && (
                 <span className="card-badge">⭐ Más solicitado</span>
               )}
-              <span className="service-icon">{service.icon}</span>
               <h3>{service.name}</h3>
               <p>{service.description}</p>
-              <div className="service-price">
-                <small>Desde</small>
-                {formatPrice(service.price)}
-              </div>
+              {service.price ? (
+                <div className="service-price">
+                  <small>Desde</small>
+                  {formatPrice(service.price)}
+                </div>
+              ) : null}
               <div className="service-duration">
                 ⏱️ Duración aprox. {service.duration} min
               </div>
