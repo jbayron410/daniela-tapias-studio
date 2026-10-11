@@ -34,6 +34,9 @@ export default function Footer() {
 								<a href="#servicios">Servicios</a>
 							</li>
 							<li>
+								<a href="/tocados">Catálogo de Tocados</a>
+							</li>
+							<li>
 								<a href="#agendar">Agendar cita</a>
 							</li>
 						</ul>

@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { toCloudinaryUrl } from "../api/cloudinary";
 
 export default function Navbar({ onBook }) {
 	const [scrolled, setScrolled] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
+	const location = useLocation();
+	const isHome = location.pathname === "/";
 
 	useEffect(() => {
 		const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -12,17 +15,18 @@ export default function Navbar({ onBook }) {
 	}, []);
 
 	const links = [
-		{ href: "#inicio", label: "Inicio" },
-		{ href: "#galeria", label: "Galería" },
-		{ href: "#servicios", label: "Servicios" },
-		{ href: "#sobre-mi", label: "Sobre mí" },
-		{ href: "#agendar", label: "Agendar" },
+		{ href: isHome ? "#inicio" : "/", label: "Inicio" },
+		{ href: isHome ? "#galeria" : "/#galeria", label: "Galería" },
+		{ href: isHome ? "#servicios" : "/#servicios", label: "Servicios" },
+		{ href: "/tocados", label: "Tocados", isRoute: true },
+		{ href: isHome ? "#sobre-mi" : "/#sobre-mi", label: "Sobre mí" },
+		{ href: isHome ? "#agendar" : "/agendar", label: "Agendar" },
 	];
 
 	return (
 		<nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
 			<div className="container">
-				<a href="#inicio" className="logo">
+				<a href={isHome ? "#inicio" : "/"} className="logo">
 					<img
 						src={toCloudinaryUrl("/w_280,f_auto,q_auto/logo-sin-letras.png")}
 						alt="Daniela Tapias Studio"
@@ -32,22 +36,34 @@ export default function Navbar({ onBook }) {
 				</a>
 
 				<div className={`nav-links ${menuOpen ? "open" : ""}`}>
-					{links.map((link) => (
-						<a
-							key={link.href}
-							href={link.href}
-							onClick={() => setMenuOpen(false)}
-						>
-							{link.label}
-						</a>
-					))}
+					{links.map((link) =>
+						link.isRoute ? (
+							<Link
+								key={link.href}
+								to={link.href}
+								onClick={() => setMenuOpen(false)}
+							>
+								{link.label}
+							</Link>
+						) : (
+							<a
+								key={link.href}
+								href={link.href}
+								onClick={() => setMenuOpen(false)}
+							>
+								{link.label}
+							</a>
+						)
+					)}
 					<a
-						href="#agendar"
+						href={isHome ? "#agendar" : "/agendar"}
 						className="nav-cta nav-cta-mobile"
 						onClick={(e) => {
-							e.preventDefault();
-							setMenuOpen(false);
-							onBook();
+							if (onBook) {
+								e.preventDefault();
+								setMenuOpen(false);
+								onBook();
+							}
 						}}
 					>
 						Agenda tu cita
@@ -56,12 +72,14 @@ export default function Navbar({ onBook }) {
 
 				<div className="nav-actions">
 					<a
-						href="#agendar"
+						href={isHome ? "#agendar" : "/agendar"}
 						className="nav-cta nav-cta-desktop"
 						onClick={(e) => {
-							e.preventDefault();
-							setMenuOpen(false);
-							onBook();
+							if (onBook) {
+								e.preventDefault();
+								setMenuOpen(false);
+								onBook();
+							}
 						}}
 					>
 						Agenda tu cita

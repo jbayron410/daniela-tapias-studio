@@ -7,6 +7,7 @@ import './styles/global.css';
 
 const Agendar = React.lazy(() => import('./pages/Agendar'));
 const MisRedes = React.lazy(() => import('./pages/MisRedes'));
+const Tocados = React.lazy(() => import('./pages/Tocados'));
 const AdminRoutes = React.lazy(() => import('./pages/admin/AdminRoutes'));
 
 createRoot(document.getElementById('root')).render(
@@ -18,6 +19,8 @@ createRoot(document.getElementById('root')).render(
             <Route path="/" element={<App />} />
             <Route path="/agendar" element={<Agendar />} />
             <Route path="/mis-redes" element={<MisRedes />} />
+            <Route path="/tocados" element={<Tocados />} />
+            <Route path="/tocados/:slug" element={<Tocados />} />
             <Route path="/admin/*" element={<AdminRoutes />} />
           </Routes>
         </Suspense>

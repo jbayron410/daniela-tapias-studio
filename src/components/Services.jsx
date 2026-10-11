@@ -61,6 +61,14 @@ export default function Services({ onSelect }) {
           reserva — el valor del desplazamiento depende de tu ubicación y se
           confirma antes de agendar.
         </p>
+
+        <p className="service-note" style={{ marginTop: '12px' }}>
+          👑 <strong>¿Buscas el accesorio perfecto para tu peinado?</strong> Explora nuestro{' '}
+          <a href="/tocados" style={{ color: 'var(--primary-dark)', fontWeight: 600, textDecoration: 'underline' }}>
+            Catálogo de Tocados
+          </a>{' '}
+          con piezas exclusivas y precios de referencia.
+        </p>
       </div>
     </section>
   );

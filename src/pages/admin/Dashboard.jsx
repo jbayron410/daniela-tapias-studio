@@ -12,6 +12,7 @@ import CitaDetailModal from '../../components/admin/CitaDetailModal';
 import AdminBookingModal from '../../components/admin/AdminBookingModal';
 import BlockDayModal from '../../components/admin/BlockDayModal';
 import GalleryManager from '../../components/admin/GalleryManager';
+import HeadpieceManager from '../../components/admin/HeadpieceManager';
 import { getMesLabel, sortCitas, citaEnRangoTemporal } from '../../components/admin/helpers';
 import '../../styles/admin.css';
 
@@ -184,6 +185,12 @@ export default function Dashboard() {
           >
             Galería
           </button>
+          <button
+            className={`admin-tab ${activeTab === 'tocados' ? 'active' : ''}`}
+            onClick={() => setActiveTab('tocados')}
+          >
+            Tocados
+          </button>
         </nav>
 
         {activeTab === 'citas' && (
@@ -268,6 +275,7 @@ export default function Dashboard() {
         )}
 
         {activeTab === 'galeria' && <GalleryManager />}
+        {activeTab === 'tocados' && <HeadpieceManager />}
       </main>
 
       {citaToCancel && (

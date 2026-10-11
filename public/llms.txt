@@ -15,6 +15,7 @@ Todos los servicios tienen duracion aproximada de 1 hora.
 
 - [/](/) - Pagina principal con galeria, servicios y formulario de agendamiento
 - [/agendar](/agendar) - Pagina dedicada para agendar citas en linea
+- [/tocados](/tocados) - Catalogo de tocados y accesorios para novias y eventos especiales con solicitud por WhatsApp
 - [/mis-redes](/mis-redes) - Redes sociales de Daniela Tapias Studio
 
 ## Agendamiento
