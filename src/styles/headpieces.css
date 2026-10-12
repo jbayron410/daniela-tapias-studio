@@ -262,32 +262,13 @@
   font-size: 1.3rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .headpiece-card-title:hover {
   color: #b8912e;
-}
-
-.headpiece-card-price {
-  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-
-.headpiece-card-price small {
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  color: #777777;
-  font-weight: 600;
-  letter-spacing: 0.5px;
 }
 
 .headpiece-card-desc {
@@ -305,6 +286,7 @@
 .headpiece-card-actions {
   display: flex;
   gap: 10px;
+  margin-top: auto;
 }
 
 .btn-whatsapp-order {

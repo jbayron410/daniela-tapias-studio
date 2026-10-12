@@ -27,7 +27,6 @@ export const SAMPLE_HEADPIECES = [
     id: 'sample-1',
     name: 'Tiara Cristal Imperial',
     slug: 'tiara-cristal-imperial',
-    price: 95000,
     description: 'Elegante tiara con cristales facetados y aleación dorada. Ideal para novias y recogidos altos.',
     cloudinaryUrl: '/image/upload/w_552,h_690,c_fill,f_auto,q_auto/2025-07-31_11-06-20_[DMxzvc5gC3E].jpg',
     active: true,
@@ -38,7 +37,6 @@ export const SAMPLE_HEADPIECES = [
     id: 'sample-2',
     name: 'Tocado Perlas y Flores',
     slug: 'tocado-perlas-y-flores',
-    price: 85000,
     description: 'Delicado tocado flexible elaborado con perlas de río y flores artesanales. Perfecto para semirecogidos.',
     cloudinaryUrl: '/image/upload/w_552,h_690,c_fill,f_auto,q_auto/2025-09-02_09-50-01_[DOGpPnnDQMN].jpg',
     active: true,
@@ -49,7 +47,6 @@ export const SAMPLE_HEADPIECES = [
     id: 'sample-3',
     name: 'Guía Flexible de Cristales',
     slug: 'guia-flexible-de-cristales',
-    price: 75000,
     description: 'Guía moldeable que se adapta a trenzas, coletas o recogidos románticos. Brillo sutil y duradero.',
     cloudinaryUrl: '/image/upload/w_552,h_690,c_fill,f_auto,q_auto/2026-01-26_09-59-13_[DT-mWjskcS-].jpg',
     active: true,
@@ -60,7 +57,6 @@ export const SAMPLE_HEADPIECES = [
     id: 'sample-4',
     name: 'Peineta Floral Dorada',
     slug: 'peineta-floral-dorada',
-    price: 70000,
     description: 'Peineta artesanal con hojas en oro rosa y cristales brillantes. Fácil fijación en cualquier estilo de peinado.',
     cloudinaryUrl: '/image/upload/w_552,h_690,c_fill,f_auto,q_auto/2026-06-10_12-40-54_[DZagK5_wh72].jpg',
     active: true,
@@ -83,7 +79,6 @@ function normalizeHeadpiece(id, data) {
     id,
     name: data.name || 'Tocado Exclusivo',
     slug: data.slug || slugify(data.name || id),
-    price: typeof data.price === 'number' ? data.price : Number(data.price) || 0,
     description: data.description || '',
     cloudinaryUrl: rawUrl,
     url,
@@ -176,7 +171,6 @@ export async function addHeadpiece(data) {
   const payload = {
     name: data.name.trim(),
     slug: generatedSlug,
-    price: Number(data.price) || 0,
     description: (data.description || '').trim(),
     cloudinaryUrl: data.cloudinaryUrl || '',
     publicId: data.publicId || null,
@@ -204,9 +198,6 @@ export async function updateHeadpiece(id, data) {
     payload.slug = slugify(payload.name);
   } else if (payload.slug) {
     payload.slug = slugify(payload.slug);
-  }
-  if (payload.price !== undefined) {
-    payload.price = Number(payload.price) || 0;
   }
   await updateDoc(ref, payload);
 }

@@ -9,13 +9,7 @@ import '../styles/headpieces.css';
 const WHATSAPP_NUMBER = '573216646983';
 const SITE_DOMAIN = 'https://www.danielatapias.com';
 
-function formatPriceCOP(price) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(price || 0);
-}
+
 
 export default function Tocados() {
   const { slug } = useParams();
@@ -91,14 +85,12 @@ export default function Tocados() {
   const buildWhatsAppLink = (item) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : SITE_DOMAIN;
     const itemUrl = `${origin}/tocados/${item.slug}`;
-    const priceText = formatPriceCOP(item.price);
 
     const message =
       `Hola Daniela, me encantó este tocado del Catálogo de Tocados:\n\n` +
       `✨ *${item.name}*\n` +
-      `💰 Valor: ${priceText} COP\n` +
       `🔗 Ver referencia: ${itemUrl}\n\n` +
-      `¿Aún se encuentra disponible?`;
+      `¿Me podrías brindar más información sobre su precio y disponibilidad?`;
 
     return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
   };
@@ -236,11 +228,6 @@ export default function Tocados() {
                     {item.name}
                   </h3>
 
-                  <div className="headpiece-card-price">
-                    {formatPriceCOP(item.price)}
-                    <small>COP</small>
-                  </div>
-
                   {item.description && (
                     <p className="headpiece-card-desc">{item.description}</p>
                   )}
@@ -311,10 +298,6 @@ export default function Tocados() {
                 </span>
 
                 <h2 className="headpiece-modal-title">{selectedItem.name}</h2>
-
-                <div className="headpiece-modal-price">
-                  {formatPriceCOP(selectedItem.price)} <span className="cop-label">COP</span>
-                </div>
 
                 <p className="headpiece-modal-desc">
                   {selectedItem.description ||

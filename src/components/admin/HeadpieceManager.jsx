@@ -11,18 +11,9 @@ import ConfirmModal from './ConfirmModal';
 import '../../styles/admin.css';
 import '../../styles/headpieces.css';
 
-function formatPriceCOP(price) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0,
-  }).format(price || 0);
-}
-
 const emptyForm = {
   name: '',
   slug: '',
-  price: '',
   description: '',
   cloudinaryUrl: '',
   active: true,
@@ -78,8 +69,7 @@ export default function HeadpieceManager() {
     setFormData({
       name: item.name,
       slug: item.slug,
-      price: item.price,
-      description: item.description,
+      description: item.description || '',
       cloudinaryUrl: item.cloudinaryUrl || '',
       active: item.active !== false,
       featured: Boolean(item.featured),
@@ -143,7 +133,6 @@ export default function HeadpieceManager() {
       const payload = {
         name: formData.name.trim(),
         slug: formData.slug.trim() || slugify(formData.name),
-        price: Number(formData.price) || 0,
         description: formData.description.trim(),
         cloudinaryUrl: formData.cloudinaryUrl,
         active: formData.active,
@@ -365,7 +354,6 @@ export default function HeadpieceManager() {
               <div className="admin-headpiece-details">
                 <div className="admin-headpiece-name">{item.name}</div>
                 <div className="admin-headpiece-slug">/tocados/{item.slug}</div>
-                <div className="admin-headpiece-price">{formatPriceCOP(item.price)}</div>
 
                 <div className="admin-headpiece-actions">
                   <button
@@ -454,21 +442,6 @@ export default function HeadpieceManager() {
                     setFormData((prev) => ({ ...prev, slug: slugify(e.target.value) }))
                   }
                   placeholder="tiara-cristal-imperial"
-                />
-              </div>
-
-              <div className="modal-field">
-                <label>Precio de venta (COP) *</label>
-                <input
-                  type="number"
-                  required
-                  min="0"
-                  step="1000"
-                  placeholder="Ej: 85000"
-                  value={formData.price}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, price: e.target.value }))
-                  }
                 />
               </div>
 
