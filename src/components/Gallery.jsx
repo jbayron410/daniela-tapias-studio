@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CATEGORIES } from '../data/services';
 import { fetchGallery, fetchCategoryVisibility, fetchCategoryLabels } from '../api/gallery';
+import { trackPortfolioTabChange, trackPortfolioItemView } from '../utils/gtm';
 
 const MOBILE_BREAKPOINT = 767;
 const TABLET_BREAKPOINT = 1024;
@@ -101,8 +102,16 @@ export default function Gallery() {
   }, [enabledCategories, activeCategory]);
 
   const handleCategoryChange = (catId) => {
+    const cat = enabledCategories.find((c) => c.id === catId);
+    const label = cat ? getCatLabel(cat) : catId;
+    trackPortfolioTabChange(catId, label);
     setActiveCategory(catId);
     setCurrentPage(1);
+  };
+
+  const handleItemClick = (src, index) => {
+    trackPortfolioItemView(src, activeCategory, isVideo(src));
+    setLightboxItem({ src, index });
   };
 
   const goToPage = (page) => {
@@ -160,7 +169,7 @@ export default function Gallery() {
             <div
               key={src}
               className={`gallery-item ${isVideo(src) ? 'video' : ''}`}
-              onClick={() => setLightboxItem({ src, index })}
+              onClick={() => handleItemClick(src, index)}
             >
               {isVideo(src) ? (
                 <>

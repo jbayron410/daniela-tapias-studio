@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toCloudinaryUrl } from "../api/cloudinary";
+import { trackNavClick, trackCtaClick, trackBookingStart } from "../utils/gtm";
 
 export default function Navbar({ onBook }) {
 	const [scrolled, setScrolled] = useState(false);
@@ -23,10 +24,29 @@ export default function Navbar({ onBook }) {
 		{ href: isHome ? "#agendar" : "/agendar", label: "Agendar" },
 	];
 
+	const handleLinkClick = (link) => {
+		setMenuOpen(false);
+		trackNavClick(link.label, link.href, 'header');
+	};
+
+	const handleBookingCtaClick = (locationType, e) => {
+		trackCtaClick('Agenda tu cita', locationType, isHome ? '#agendar' : '/agendar');
+		trackBookingStart(locationType);
+		if (onBook) {
+			e.preventDefault();
+			setMenuOpen(false);
+			onBook();
+		}
+	};
+
 	return (
 		<nav className={`navbar ${scrolled ? "scrolled" : ""}`}>
 			<div className="container">
-				<a href={isHome ? "#inicio" : "/"} className="logo">
+				<a
+					href={isHome ? "#inicio" : "/"}
+					className="logo"
+					onClick={() => trackNavClick('Logo Daniela Tapias', isHome ? '#inicio' : '/', 'header')}
+				>
 					<img
 						src={toCloudinaryUrl("/w_280,f_auto,q_auto/logo-sin-letras.png")}
 						alt="Daniela Tapias Studio"
@@ -41,7 +61,7 @@ export default function Navbar({ onBook }) {
 							<Link
 								key={link.href}
 								to={link.href}
-								onClick={() => setMenuOpen(false)}
+								onClick={() => handleLinkClick(link)}
 							>
 								{link.label}
 							</Link>
@@ -49,7 +69,7 @@ export default function Navbar({ onBook }) {
 							<a
 								key={link.href}
 								href={link.href}
-								onClick={() => setMenuOpen(false)}
+								onClick={() => handleLinkClick(link)}
 							>
 								{link.label}
 							</a>
@@ -58,13 +78,7 @@ export default function Navbar({ onBook }) {
 					<a
 						href={isHome ? "#agendar" : "/agendar"}
 						className="nav-cta nav-cta-mobile"
-						onClick={(e) => {
-							if (onBook) {
-								e.preventDefault();
-								setMenuOpen(false);
-								onBook();
-							}
-						}}
+						onClick={(e) => handleBookingCtaClick('header_mobile', e)}
 					>
 						Agenda tu cita
 					</a>
@@ -74,13 +88,7 @@ export default function Navbar({ onBook }) {
 					<a
 						href={isHome ? "#agendar" : "/agendar"}
 						className="nav-cta nav-cta-desktop"
-						onClick={(e) => {
-							if (onBook) {
-								e.preventDefault();
-								setMenuOpen(false);
-								onBook();
-							}
-						}}
+						onClick={(e) => handleBookingCtaClick('header_desktop', e)}
 					>
 						Agenda tu cita
 					</a>

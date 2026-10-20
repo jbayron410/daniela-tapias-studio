@@ -1,6 +1,18 @@
 import { toCloudinaryUrl } from "../api/cloudinary";
+import { trackCtaClick, trackBookingStart } from "../utils/gtm";
 
 export default function Hero({ onBook, onExploreGallery }) {
+	const handleBookClick = () => {
+		trackCtaClick('Agenda tu cita', 'hero', '#agendar');
+		trackBookingStart('hero');
+		if (onBook) onBook();
+	};
+
+	const handlePortfolioClick = (e) => {
+		trackCtaClick('Ver portafolio', 'hero', '#galeria');
+		if (onExploreGallery) onExploreGallery(e);
+	};
+
 	return (
 		<section id="inicio" className="hero">
 			<div className="container">
@@ -19,10 +31,10 @@ export default function Hero({ onBook, onExploreGallery }) {
 							que luzcas espectacular en tu ocasión especial.
 						</p>
 						<div className="hero-buttons">
-							<button className="btn btn-primary btn-lg" onClick={onBook}>
+							<button className="btn btn-primary btn-lg" onClick={handleBookClick}>
 								Agenda tu cita
 							</button>
-							<a href="#galeria" className="btn btn-outline btn-lg" onClick={onExploreGallery}>
+							<a href="#galeria" className="btn btn-outline btn-lg" onClick={handlePortfolioClick}>
 								Ver portafolio
 							</a>
 						</div>

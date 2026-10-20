@@ -1,4 +1,5 @@
 import { SERVICES } from '../data/services';
+import { trackServiceSelect, trackBookingStart, trackNavClick } from '../utils/gtm';
 
 function formatPrice(price) {
   return new Intl.NumberFormat('es-CO', {
@@ -9,6 +10,12 @@ function formatPrice(price) {
 }
 
 export default function Services({ onSelect }) {
+  const handleServiceClick = (service) => {
+    trackServiceSelect(service.id, service.name, service.price || 0);
+    trackBookingStart(`service_card_${service.id}`);
+    if (onSelect) onSelect(service);
+  };
+
   return (
     <section id="servicios" className="section">
       <div className="container">
@@ -48,7 +55,7 @@ export default function Services({ onSelect }) {
               </ul>
               <button
                 className={`btn ${service.id === 'novias' ? 'btn-gold' : 'btn-primary'}`}
-                onClick={() => onSelect(service)}
+                onClick={() => handleServiceClick(service)}
               >
                 {service.name}
               </button>
@@ -64,7 +71,11 @@ export default function Services({ onSelect }) {
 
         <p className="service-note" style={{ marginTop: '12px' }}>
           👑 <strong>¿Buscas el accesorio perfecto para tu peinado?</strong> Explora nuestro{' '}
-          <a href="/tocados" style={{ color: 'var(--primary-dark)', fontWeight: 600, textDecoration: 'underline' }}>
+          <a
+            href="/tocados"
+            onClick={() => trackNavClick('Catálogo de Tocados', '/tocados', 'services_section')}
+            style={{ color: 'var(--primary-dark)', fontWeight: 600, textDecoration: 'underline' }}
+          >
             Catálogo de Tocados
           </a>{' '}
           con piezas exclusivas y precios de referencia.

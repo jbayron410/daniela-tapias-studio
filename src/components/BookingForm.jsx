@@ -9,6 +9,7 @@ import { isValidPhoneNumber } from 'libphonenumber-js';
 import 'react-phone-number-input/style.css';
 import { SERVICES } from '../data/services';
 import { createBooking } from '../api/n8n';
+import { trackBookingSubmit, trackWhatsAppClick, trackServiceSelect } from '../utils/gtm';
 
 const MAQUILLAJE_PRICE = 80000;
 
@@ -160,6 +161,15 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
       await createBooking(bookingPayload);
 
+      trackBookingSubmit({
+        serviceName: selectedService.name,
+        price: totalPrice,
+        isHomeService: form.domicilio,
+        requiresMakeup: isAccompaniment ? false : form.requiereMaquillaje,
+        requiresTrial: isServiceWithPrueba(form.serviceId) ? form.requierePrueba : false,
+        success: true
+      });
+
       setConfirmedBooking({
         ...bookingPayload,
         serviceName: selectedService.name
@@ -180,6 +190,17 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
         });
       }, 100);
     } catch (error) {
+      const selectedService = SERVICES.find((s) => s.id === form.serviceId);
+      trackBookingSubmit({
+        serviceName: selectedService ? selectedService.name : form.serviceId,
+        price: (selectedService?.price || 0) + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0),
+        isHomeService: form.domicilio,
+        requiresMakeup: form.requiereMaquillaje,
+        requiresTrial: form.requierePrueba,
+        success: false,
+        errorMessage: error.message
+      });
+
       setMessage({
         type: 'error',
         text: `❌ No se pudo registrar la pre-agenda: ${error.message}. Intenta nuevamente.`
@@ -232,6 +253,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-whatsapp-inline"
+                  onClick={() => trackWhatsAppClick('booking_sidebar', 'Pregunta sobre servicios')}
                 >
                   Agendar por WhatsApp
                 </a>
@@ -254,6 +276,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                     key={service.id}
                     className={`service-option ${form.serviceId === service.id ? 'selected' : ''}`}
                     onClick={() => {
+                      trackServiceSelect(service.id, service.name, service.price || 0);
                       setForm((prev) => ({
                         ...prev,
                         serviceId: service.id,
@@ -465,6 +488,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                       href="https://wa.me/573216646983?text=Hola%20Daniela%2C%20quiero%20agendar%20una%20cita%20para%20hoy"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackWhatsAppClick('booking_sameday_hint', 'Cita para hoy')}
                     >
                       WhatsApp
                     </a>

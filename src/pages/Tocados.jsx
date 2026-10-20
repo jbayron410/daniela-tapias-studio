@@ -4,12 +4,19 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import SEO from '../components/SEO';
 import { fetchHeadpieces } from '../api/headpieces';
+import {
+  trackHeadpieceView,
+  trackHeadpieceFilter,
+  trackHeadpieceSearch,
+  trackHeadpieceWhatsAppOrder,
+  trackHeadpieceCopyLink,
+  trackWhatsAppClick,
+  trackCtaClick
+} from '../utils/gtm';
 import '../styles/headpieces.css';
 
 const WHATSAPP_NUMBER = '573216646983';
 const SITE_DOMAIN = 'https://www.danielatapias.com';
-
-
 
 export default function Tocados() {
   const { slug } = useParams();
@@ -54,6 +61,13 @@ export default function Tocados() {
       );
       if (match) {
         setSelectedItem(match);
+        trackHeadpieceView({
+          id: match.id,
+          name: match.name,
+          slug: match.slug,
+          featured: match.featured,
+          active: match.active
+        });
       }
     } else if (!slug) {
       setSelectedItem(null);
@@ -61,6 +75,13 @@ export default function Tocados() {
   }, [slug, headpieces]);
 
   const handleOpenDetail = useCallback((item) => {
+    trackHeadpieceView({
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      featured: item.featured,
+      active: item.active
+    });
     setSelectedItem(item);
     navigate(`/tocados/${item.slug}`, { replace: false });
   }, [navigate]);
@@ -71,7 +92,13 @@ export default function Tocados() {
     navigate('/tocados', { replace: true });
   }, [navigate]);
 
+  const handleFilterClick = (filter) => {
+    trackHeadpieceFilter(filter);
+    setActiveFilter(filter);
+  };
+
   const handleCopyLink = (item) => {
+    trackHeadpieceCopyLink(item.slug);
     const origin = typeof window !== 'undefined' ? window.location.origin : SITE_DOMAIN;
     const itemUrl = `${origin}/tocados/${item.slug}`;
     if (navigator.clipboard) {
@@ -160,25 +187,31 @@ export default function Tocados() {
               placeholder="Buscar por estilo o nombre..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onBlur={() => {
+                if (searchTerm.trim()) trackHeadpieceSearch(searchTerm);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && searchTerm.trim()) trackHeadpieceSearch(searchTerm);
+              }}
             />
           </div>
 
           <div className="headpieces-filter-pills">
             <button
               className={`filter-pill ${activeFilter === 'todos' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('todos')}
+              onClick={() => handleFilterClick('todos')}
             >
               Todos ({headpieces.length})
             </button>
             <button
               className={`filter-pill ${activeFilter === 'destacados' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('destacados')}
+              onClick={() => handleFilterClick('destacados')}
             >
               ⭐ Destacados
             </button>
             <button
               className={`filter-pill ${activeFilter === 'disponibles' ? 'active' : ''}`}
-              onClick={() => setActiveFilter('disponibles')}
+              onClick={() => handleFilterClick('disponibles')}
             >
               Disponibles
             </button>
@@ -238,6 +271,10 @@ export default function Tocados() {
                       target="_blank"
                       rel="noopener noreferrer"
                       className="btn-whatsapp-order"
+                      onClick={() => {
+                        trackHeadpieceWhatsAppOrder(item.name, item.slug);
+                        trackWhatsAppClick('headpiece_catalog_card', item.name);
+                      }}
                     >
                       <svg viewBox="0 0 24 24" width="16" height="16">
                         <path
@@ -323,6 +360,10 @@ export default function Tocados() {
                     rel="noopener noreferrer"
                     className="btn-whatsapp-order"
                     style={{ padding: '14px', fontSize: '1rem' }}
+                    onClick={() => {
+                      trackHeadpieceWhatsAppOrder(selectedItem.name, selectedItem.slug);
+                      trackWhatsAppClick('headpiece_detail_modal', selectedItem.name);
+                    }}
                   >
                     <svg viewBox="0 0 24 24" width="20" height="20">
                       <path
@@ -345,7 +386,12 @@ export default function Tocados() {
                 {/* Cross-selling hint */}
                 <div className="headpiece-cross-sell">
                   <span>¿Deseas lucirlo con un peinado profesional?</span>
-                  <Link to="/agendar">Agendar cita &rarr;</Link>
+                  <Link
+                    to="/agendar"
+                    onClick={() => trackCtaClick('Agendar cita (Tocados cross-sell)', 'headpiece_modal', '/agendar')}
+                  >
+                    Agendar cita &rarr;
+                  </Link>
                 </div>
               </div>
             </div>

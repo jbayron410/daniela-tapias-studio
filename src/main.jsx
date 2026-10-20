@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
+import GtmRouteTracker from './components/GtmRouteTracker';
 import './styles/global.css';
 
 const Agendar = React.lazy(() => import('./pages/Agendar'));
@@ -14,6 +15,7 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter>
+        <GtmRouteTracker />
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<App />} />

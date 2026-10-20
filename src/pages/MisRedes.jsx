@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { toCloudinaryUrl } from '../api/cloudinary';
 import SEO from '../components/SEO';
+import { trackNavClick, trackWhatsAppClick } from '../utils/gtm';
 
 const InstagramIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
@@ -95,9 +96,31 @@ export default function MisRedes() {
             const cls = `linktree-btn ${primary ? 'linktree-btn-primary' : ''}`;
 
             return to ? (
-              <Link key={label} to={to} className={cls}>{content}</Link>
+              <Link
+                key={label}
+                to={to}
+                className={cls}
+                onClick={() => trackNavClick(label, to, 'linktree')}
+              >
+                {content}
+              </Link>
             ) : (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer" className={cls}>{content}</a>
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cls}
+                onClick={() => {
+                  if (label === 'WhatsApp') {
+                    trackWhatsAppClick('linktree_page', 'Mis Redes WhatsApp');
+                  } else {
+                    trackNavClick(label, href, 'linktree');
+                  }
+                }}
+              >
+                {content}
+              </a>
             );
           })}
         </div>
