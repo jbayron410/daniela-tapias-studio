@@ -1,14 +1,6 @@
 import { SERVICES } from '../data/services';
 import { trackServiceSelect, trackBookingStart, trackNavClick } from '../utils/gtm';
 
-function formatPrice(price) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0
-  }).format(price);
-}
-
 export default function Services({ onSelect }) {
   const handleServiceClick = (service) => {
     trackServiceSelect(service.id, service.name, service.price || 0);
@@ -21,7 +13,7 @@ export default function Services({ onSelect }) {
       <div className="container">
         <div className="section-header">
           <span className="section-tag">Servicios</span>
-          <h2>Precios y servicios</h2>
+          <h2>Nuestros servicios</h2>
           <p>
             Elige el servicio perfecto para tu ocasión y agenda
             directamente en línea.
@@ -39,12 +31,6 @@ export default function Services({ onSelect }) {
               )}
               <h3>{service.name}</h3>
               <p>{service.description}</p>
-              {service.price ? (
-                <div className="service-price">
-                  <small>Desde</small>
-                  {formatPrice(service.price)}
-                </div>
-              ) : null}
               <div className="service-duration">
                 ⏱️ Duración aprox. {service.duration} min
               </div>
@@ -64,9 +50,8 @@ export default function Services({ onSelect }) {
         </div>
 
         <p className="service-note">
-          💡 <strong>¿Servicio a domicilio?</strong> Actívalo en el formulario de
-          reserva — el valor del desplazamiento depende de tu ubicación y se
-          confirma antes de agendar.
+          💡 <strong>¿Servicio a domicilio?</strong> Puedes solicitar atención en tu ubicación
+          directamente al llenar el formulario de reserva.
         </p>
 
         <p className="service-note" style={{ marginTop: '12px' }}>
@@ -78,7 +63,7 @@ export default function Services({ onSelect }) {
           >
             Catálogo de Tocados
           </a>{' '}
-          con piezas exclusivas y precios de referencia.
+          con piezas exclusivas y diseños para complementar tu estilo.
         </p>
       </div>
     </section>

@@ -13,14 +13,6 @@ import { trackBookingSubmit, trackWhatsAppClick, trackServiceSelect } from '../u
 
 const MAQUILLAJE_PRICE = 80000;
 
-function formatPrice(price) {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    maximumFractionDigits: 0
-  }).format(price);
-}
-
 function formatDateSpanish(dateStr) {
   if (!dateStr) return '';
   const date = new Date(dateStr + 'T12:00:00');
@@ -287,9 +279,6 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                     }}
                   >
                     <span className="name">{service.name}</span>
-                    {service.price ? (
-                      <span className="price">{formatPrice(service.price)}</span>
-                    ) : null}
                   </button>
                 ))}
               </div>
@@ -380,7 +369,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                 <label htmlFor="domicilio">
                   ¿Necesitas servicio a domicilio?{' '}
                   <span className="field-hint">
-                    (el valor depende de tu ubicación — será confirmado a tu número telefónico)
+                    (atención en tu dirección o lugar del evento)
                   </span>
                 </label>
               </div>
@@ -416,7 +405,7 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                     onChange={handleChange}
                   />
                   <label htmlFor="requiereMaquillaje">
-                    Requiere maquillaje ({formatPrice(MAQUILLAJE_PRICE)})
+                    Requiere maquillaje (servicio adicional)
                   </label>
                 </div>
               )}
@@ -530,27 +519,19 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                   {form.domicilio && (
                     <div className="summary-row">
                       <span className="label">Domicilio</span>
-                      <span>Según ubicación (a coordinar)</span>
+                      <span>Sí (servicio a domicilio)</span>
                     </div>
                   )}
                   {form.requiereMaquillaje && (
                     <div className="summary-row">
                       <span className="label">Maquillaje</span>
-                      <span>{formatPrice(MAQUILLAJE_PRICE)}</span>
+                      <span>Sí (servicio adicional)</span>
                     </div>
                   )}
-                  {selectedService.price ? (
-                    <div className="summary-row total">
-                      <span className="label">Total estimado</span>
-                      <span>{formatPrice(selectedService.price + (form.requiereMaquillaje ? MAQUILLAJE_PRICE : 0))}</span>
-                    </div>
-                  ) : null}
                   <p className="summary-note">
                     {form.serviceId === 'acompanamiento'
-                      ? 'Al ser un servicio en alianza con maquilladoras, la coordinación de tiempos y tarifa se realiza directamente por WhatsApp.'
-                      : form.domicilio
-                      ? 'El costo del desplazamiento y la hora exacta serán coordinados directamente contigo por WhatsApp.'
-                      : 'Daniela se comunicará contigo por WhatsApp para confirmar la hora exacta de inicio.'}
+                      ? 'Al ser un servicio en alianza con maquilladoras, la coordinación de tiempos y detalles se realiza directamente por WhatsApp.'
+                      : 'Daniela se comunicará contigo por WhatsApp para coordinar la hora exacta y confirmar todos los detalles de tu cita.'}
                   </p>
                 </div>
               </div>
@@ -588,15 +569,11 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
                         💇‍♀️ <strong>Prueba de peinado:</strong> Recuerda que la prueba previa se coordina para un día de semana (lunes a viernes).
                       </div>
                     )}
-                    {confirmedBooking.precio > 0 ? (
-                      <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
-                        El valor mostrado es una estimación. El valor final se confirmará al definir particularidades del peinado o desplazamiento.
-                      </p>
-                    ) : (
-                      <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
-                        Al ser un servicio de coordinación entre profesionales, los detalles y tarifa se definirán directamente por WhatsApp.
-                      </p>
-                    )}
+                    <p className="confirmation-disclaimer" style={{ marginTop: '0.75rem' }}>
+                      {confirmedBooking.servicio === 'Acompañamiento'
+                        ? 'Al ser un servicio de coordinación entre profesionales, la atención y detalles se coordinarán directamente por WhatsApp.'
+                        : 'Daniela revisará tu solicitud para coordinar la hora exacta y todos los detalles de tu peinado directamente por WhatsApp.'}
+                    </p>
                   </div>
                 )}
               </div>
