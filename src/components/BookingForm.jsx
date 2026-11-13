@@ -12,6 +12,36 @@ import { createBooking } from '../api/n8n';
 import { trackBookingSubmit, trackWhatsAppClick, trackServiceSelect } from '../utils/gtm';
 
 const MAQUILLAJE_PRICE = 80000;
+const SPECIAL_HOLIDAY_DATES = ['2026-12-24', '2026-12-31'];
+
+function isSpecialHolidayDate(dateStr) {
+  return SPECIAL_HOLIDAY_DATES.includes(dateStr);
+}
+
+function buildSpecialHolidayWhatsAppUrl(form, selectedService) {
+  const dateLabel = form.date === '2026-12-24' ? '24 de diciembre de 2026' : '31 de diciembre de 2026';
+  const lines = [
+    `Hola Daniela ✨, quiero consultar disponibilidad para agendar una cita el *${dateLabel}*.`
+  ];
+  if (selectedService) {
+    lines.push(`• Servicio: ${selectedService.name}`);
+  }
+  if (form.name && form.name.trim()) {
+    lines.push(`• Nombre: ${form.name.trim()}`);
+  }
+  if (form.domicilio) {
+    lines.push(
+      `• Modalidad: A domicilio${form.domicilioDetalles?.trim() ? ` (${form.domicilioDetalles.trim()})` : ''}`
+    );
+  }
+  if (form.requiereMaquillaje && form.serviceId !== 'acompanamiento') {
+    lines.push('• Adicional: Requiere maquillaje');
+  }
+  lines.push(
+    'Tengo claras las condiciones especiales de la fecha (reserva con el 50% de anticipo y horario fijo sin cambios).'
+  );
+  return `https://wa.me/573216646983?text=${encodeURIComponent(lines.join('\n'))}`;
+}
 
 function formatDateSpanish(dateStr) {
   if (!dateStr) return '';
@@ -109,6 +139,11 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isSpecialHolidayDate(form.date)) {
+      return;
+    }
+
     setTouched({
       serviceId: true,
       name: true,
@@ -204,11 +239,16 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
 
   const selectedService = SERVICES.find((s) => s.id === form.serviceId);
   const showPruebaOption = selectedService && isServiceWithPrueba(selectedService.id);
+  const isSpecialHoliday = isSpecialHolidayDate(form.date);
+  const specialHolidayWhatsAppUrl = isSpecialHoliday
+    ? buildSpecialHolidayWhatsAppUrl(form, selectedService)
+    : '';
 
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const minDate = tomorrow.toISOString().split('T')[0];
-  const maxDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const computedMaxDate = new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const maxDate = computedMaxDate < '2026-12-31' ? '2026-12-31' : computedMaxDate;
 
   return (
     <section id="agendar" className="section booking-section">
@@ -487,64 +527,125 @@ export default function BookingForm({ preselectService, onResetPreselect }) {
               </div>
             </div>
 
-            {/* Resumen */}
-            {selectedService && form.date && (
+            {/* Resumen o Condiciones de Fecha Especial (24 y 31 de diciembre) */}
+            {isSpecialHoliday ? (
               <div className="form-step">
-                <div className="booking-summary">
-                  <h4>Resumen de tu pre-agenda</h4>
-                  <div className="summary-row">
-                    <span className="label">Servicio</span>
-                    <span>{selectedService.name}</span>
+                <div className="booking-special-holiday-card" role="region" aria-label="Condiciones especiales para 24 y 31 de diciembre">
+                  <div className="booking-special-holiday-badge">
+                    🎄 FECHA ESPECIAL · CUPOS LIMITADOS
                   </div>
-                  <div className="summary-row">
-                    <span className="label">Fecha deseada</span>
-                    <span style={{ textTransform: 'capitalize' }}>
-                      {formatDateSpanish(form.date)}
-                    </span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="label">Horario</span>
-                    <span style={{ color: '#b45309', fontWeight: 500 }}>A coordinar por WhatsApp</span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="label">Duración aprox.</span>
-                    <span>{selectedService.duration} min</span>
-                  </div>
-                  {showPruebaOption && (
-                    <div className="summary-row">
-                      <span className="label">Prueba previa</span>
-                      <span>{form.requierePrueba ? 'Sí (en día de semana)' : 'No solicitada'}</span>
-                    </div>
-                  )}
-                  {form.domicilio && (
-                    <div className="summary-row">
-                      <span className="label">Domicilio</span>
-                      <span>Sí (servicio a domicilio)</span>
-                    </div>
-                  )}
-                  {form.requiereMaquillaje && (
-                    <div className="summary-row">
-                      <span className="label">Maquillaje</span>
-                      <span>Sí (servicio adicional)</span>
-                    </div>
-                  )}
-                  <p className="summary-note">
-                    {form.serviceId === 'acompanamiento'
-                      ? 'Al ser un servicio en alianza con maquilladoras, la coordinación de tiempos y detalles se realiza directamente por WhatsApp.'
-                      : 'Daniela se comunicará contigo por WhatsApp para coordinar la hora exacta y confirmar todos los detalles de tu cita.'}
+                  <h4 className="booking-special-holiday-title">
+                    Agendamiento exclusivo por WhatsApp ({form.date === '2026-12-24' ? '24 de diciembre' : '31 de diciembre'})
+                  </h4>
+                  <p className="booking-special-holiday-intro">
+                    Para el <strong>24 y 31 de diciembre de 2026</strong> los cupos son muy limitados, por lo que{' '}
+                    <strong>no se agenda por la página web</strong> sino directamente por WhatsApp bajo estas condiciones:
                   </p>
+
+                  <ul className="booking-special-holiday-list">
+                    <li>
+                      <span className="special-rule-badge">50%</span>
+                      <div>
+                        <strong>Reserva con el 50% de anticipo:</strong> Tu cita se separa únicamente abonando el 50% del valor del servicio al agendar (el 50% restante lo cancelas el día de tu cita).
+                      </div>
+                    </li>
+                    <li>
+                      <span className="special-rule-badge">FIJO</span>
+                      <div>
+                        <strong>Horario fijo e inamovible:</strong> Una vez separada tu cita, <strong>no se podrá mover ni cambiar de horario</strong>. Elige muy bien tu hora disponible.
+                      </div>
+                    </li>
+                    <li>
+                      <span className="special-rule-badge">WA</span>
+                      <div>
+                        <strong>Confirmación directa:</strong> Te compartiré por WhatsApp los horarios disponibles en tiempo real y los datos para tu anticipo.
+                      </div>
+                    </li>
+                  </ul>
+
+                  <a
+                    href={specialHolidayWhatsAppUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn booking-special-whatsapp-btn"
+                    onClick={() =>
+                      trackWhatsAppClick(
+                        'booking_special_holiday_december',
+                        `Cita especial ${form.date}`
+                      )
+                    }
+                  >
+                    <svg className="wa-icon" viewBox="0 0 24 24" width="22" height="22">
+                      <path
+                        fill="currentColor"
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                      />
+                    </svg>
+                    Agendar {form.date === '2026-12-24' ? '24 de diciembre' : '31 de diciembre'} por WhatsApp
+                  </a>
                 </div>
               </div>
-            )}
+            ) : (
+              <>
+                {selectedService && form.date && (
+                  <div className="form-step">
+                    <div className="booking-summary">
+                      <h4>Resumen de tu pre-agenda</h4>
+                      <div className="summary-row">
+                        <span className="label">Servicio</span>
+                        <span>{selectedService.name}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span className="label">Fecha deseada</span>
+                        <span style={{ textTransform: 'capitalize' }}>
+                          {formatDateSpanish(form.date)}
+                        </span>
+                      </div>
+                      <div className="summary-row">
+                        <span className="label">Horario</span>
+                        <span style={{ color: '#b45309', fontWeight: 500 }}>A coordinar por WhatsApp</span>
+                      </div>
+                      <div className="summary-row">
+                        <span className="label">Duración aprox.</span>
+                        <span>{selectedService.duration} min</span>
+                      </div>
+                      {showPruebaOption && (
+                        <div className="summary-row">
+                          <span className="label">Prueba previa</span>
+                          <span>{form.requierePrueba ? 'Sí (en día de semana)' : 'No solicitada'}</span>
+                        </div>
+                      )}
+                      {form.domicilio && (
+                        <div className="summary-row">
+                          <span className="label">Domicilio</span>
+                          <span>Sí (servicio a domicilio)</span>
+                        </div>
+                      )}
+                      {form.requiereMaquillaje && (
+                        <div className="summary-row">
+                          <span className="label">Maquillaje</span>
+                          <span>Sí (servicio adicional)</span>
+                        </div>
+                      )}
+                      <p className="summary-note">
+                        {form.serviceId === 'acompanamiento'
+                          ? 'Al ser un servicio en alianza con maquilladoras, la coordinación de tiempos y detalles se realiza directamente por WhatsApp.'
+                          : 'Daniela se comunicará contigo por WhatsApp para coordinar la hora exacta y confirmar todos los detalles de tu cita.'}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-            <button
-              type="submit"
-              className="btn btn-primary btn-lg"
-              style={{ width: '100%' }}
-              disabled={submitting}
-            >
-              {submitting ? '⏳ Enviando pre-agenda...' : '📅 Solicitar mi pre-agenda'}
-            </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-lg"
+                  style={{ width: '100%' }}
+                  disabled={submitting}
+                >
+                  {submitting ? '⏳ Enviando pre-agenda...' : '📅 Solicitar mi pre-agenda'}
+                </button>
+              </>
+            )}
 
             {message && (
               <div

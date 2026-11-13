@@ -235,3 +235,85 @@ export async function updateCategoryLabel(categoryId, label, currentState) {
   await setDoc(doc(db, CONFIG_DOC), { categoryLabels: updated }, { merge: true });
   return updated;
 }
+
+const SEASONAL_CACHE_KEY = 'dt_seasonal_theme_config';
+
+export const DEFAULT_SEASONAL_THEME = {
+  mode: 'auto', // 'auto' | 'enabled' | 'disabled'
+  expiresAt: '2026-12-31T23:59:59-05:00',
+};
+
+/**
+ * Evaluates whether the Christmas theme should be active based on mode and expiration timestamp.
+ * @param {Object} config - { mode: 'auto' | 'enabled' | 'disabled', expiresAt: string }
+ * @returns {boolean} True when the Christmas theme should render
+ */
+export function isChristmasThemeActive(config = DEFAULT_SEASONAL_THEME) {
+  const currentConfig = { ...DEFAULT_SEASONAL_THEME, ...config };
+  if (currentConfig.mode === 'disabled') return false;
+  if (currentConfig.mode === 'enabled') return true;
+
+  const expirationTime = new Date(
+    currentConfig.expiresAt || DEFAULT_SEASONAL_THEME.expiresAt
+  ).getTime();
+  return Date.now() <= expirationTime;
+}
+
+/**
+ * Reads the cached seasonal theme configuration from localStorage to avoid initial UI flicker.
+ * @returns {Object} Cached or default seasonal theme configuration
+ */
+export function getCachedSeasonalTheme() {
+  try {
+    const raw = localStorage.getItem(SEASONAL_CACHE_KEY);
+    if (raw) {
+      return { ...DEFAULT_SEASONAL_THEME, ...JSON.parse(raw) };
+    }
+  } catch (err) {
+    console.warn('Failed to read cached seasonal theme config:', err);
+  }
+  return DEFAULT_SEASONAL_THEME;
+}
+
+/**
+ * Fetches the seasonal theme configuration from Firestore and updates the local cache.
+ * @returns {Promise<Object>} { mode: 'auto' | 'enabled' | 'disabled', expiresAt: string }
+ */
+export async function fetchSeasonalThemeConfig() {
+  try {
+    const snap = await getDoc(doc(db, CONFIG_DOC));
+    if (snap.exists() && snap.data().seasonalTheme) {
+      const merged = { ...DEFAULT_SEASONAL_THEME, ...snap.data().seasonalTheme };
+      try {
+        localStorage.setItem(SEASONAL_CACHE_KEY, JSON.stringify(merged));
+      } catch (cacheErr) {
+        console.warn('Failed to cache seasonal theme config:', cacheErr);
+      }
+      return merged;
+    }
+  } catch (err) {
+    console.warn('Failed to fetch seasonal theme config from Firestore:', err);
+  }
+  return getCachedSeasonalTheme();
+}
+
+/**
+ * Updates the seasonal theme mode in Firestore ('auto' | 'enabled' | 'disabled').
+ * @param {string} mode - Target mode ('auto', 'enabled', or 'disabled')
+ * @returns {Promise<Object>} Updated configuration object
+ */
+export async function updateSeasonalThemeMode(mode) {
+  const updatedConfig = {
+    ...DEFAULT_SEASONAL_THEME,
+    mode,
+    updatedAt: new Date().toISOString(),
+  };
+  await setDoc(doc(db, CONFIG_DOC), { seasonalTheme: updatedConfig }, { merge: true });
+  try {
+    localStorage.setItem(SEASONAL_CACHE_KEY, JSON.stringify(updatedConfig));
+  } catch (cacheErr) {
+    console.warn('Failed to update cached seasonal theme config:', cacheErr);
+  }
+  return updatedConfig;
+}
+

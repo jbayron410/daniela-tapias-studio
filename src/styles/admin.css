@@ -2149,4 +2149,156 @@
     grid-template-columns: 1fr;
     gap: 14px;
   }
+
+  .admin-seasonal-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+  }
+
+  .admin-seasonal-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-seasonal-toggle-group {
+    flex-direction: column;
+  }
+
+  .admin-seasonal-preview-link {
+    text-align: center;
+  }
+}
+
+/* ============ Seasonal Theme Control Card ============ */
+.admin-seasonal-card {
+  background: linear-gradient(135deg, #fffdf9 0%, #fff8f2 100%);
+  border: 1px solid rgba(201, 162, 75, 0.35);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  box-shadow: 0 4px 16px rgba(139, 26, 35, 0.05);
+}
+
+.admin-seasonal-info {
+  flex: 1;
+  min-width: 240px;
+}
+
+.admin-seasonal-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.admin-seasonal-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.admin-seasonal-title-row h3 {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
+}
+
+.admin-seasonal-status {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 10px;
+  border-radius: 50px;
+}
+
+.admin-seasonal-status.is-active {
+  background: rgba(31, 77, 54, 0.12);
+  color: #1F4D36;
+  border: 1px solid rgba(31, 77, 54, 0.25);
+}
+
+.admin-seasonal-status.is-inactive {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-light);
+}
+
+.admin-seasonal-desc {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.admin-seasonal-desc strong {
+  color: var(--dark);
+}
+
+.admin-seasonal-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-seasonal-toggle-group {
+  display: flex;
+  background: #f3ede4;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 4px;
+}
+
+.admin-seasonal-btn {
+  padding: 8px 13px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-light);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-seasonal-btn:hover:not(:disabled) {
+  color: var(--dark);
+}
+
+.admin-seasonal-btn.active {
+  background: #8B1A23;
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(139, 26, 35, 0.25);
+}
+
+.admin-seasonal-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.admin-seasonal-preview-link {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #8B1A23;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 26, 35, 0.22);
+  background: #FFFFFF;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.admin-seasonal-preview-link:hover {
+  background: #8B1A23;
+  color: #FFFFFF;
 }

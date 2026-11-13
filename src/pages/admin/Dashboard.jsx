@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchCitas, confirmCita, markCitaConfirmed, cancelCita } from '../../api/sheets';
 import { getBlocks } from '../../api/n8n';
+import {
+  fetchSeasonalThemeConfig,
+  updateSeasonalThemeMode,
+  isChristmasThemeActive,
+  getCachedSeasonalTheme,
+} from '../../api/gallery';
 import DashboardHeader from '../../components/admin/DashboardHeader';
 import StatsCards from '../../components/admin/StatsCards';
 import FilterBar from '../../components/admin/FilterBar';
@@ -34,6 +40,32 @@ export default function Dashboard() {
   const [showBlockDay, setShowBlockDay] = useState(false);
   const [editingCita, setEditingCita] = useState(null);
   const [bloqueos, setBloqueos] = useState([]);
+  const [seasonalConfig, setSeasonalConfig] = useState(() => getCachedSeasonalTheme());
+  const [savingSeasonal, setSavingSeasonal] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchSeasonalThemeConfig().then((config) => {
+      if (isMounted) setSeasonalConfig(config);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleSeasonalModeChange = useCallback(async (newMode) => {
+    setSavingSeasonal(true);
+    try {
+      const updated = await updateSeasonalThemeMode(newMode);
+      setSeasonalConfig(updated);
+    } catch (err) {
+      alert(err.message || 'No se pudo actualizar el modo navideño');
+    } finally {
+      setSavingSeasonal(false);
+    }
+  }, []);
+
+  const isFestiveActiveNow = isChristmasThemeActive(seasonalConfig);
 
   const loadCitas = useCallback(async () => {
     setLoading(true);
@@ -211,6 +243,57 @@ export default function Dashboard() {
               <button className="admin-action-btn admin-action-warning" onClick={() => setShowBlockDay(true)}>
                 🔒 Bloquear Agenda
               </button>
+            </div>
+
+            <div className="admin-seasonal-card">
+              <div className="admin-seasonal-info">
+                <div className="admin-seasonal-title-row">
+                  <span className="admin-seasonal-icon">🎄</span>
+                  <h3>Diseño Navideño en /mis-redes</h3>
+                  <span className={`admin-seasonal-status ${isFestiveActiveNow ? 'is-active' : 'is-inactive'}`}>
+                    {isFestiveActiveNow ? 'Activo ahora' : 'Diseño clásico'}
+                  </span>
+                </div>
+                <p className="admin-seasonal-desc">
+                  En modo <strong>Automático</strong> se desactivará solo el <strong>31 de diciembre de 2026 a las 11:59 p.m.</strong> sin que tengas que tocar nada el 1 de enero.
+                </p>
+              </div>
+              <div className="admin-seasonal-controls">
+                <div className="admin-seasonal-toggle-group" role="group" aria-label="Modo diseño navideño">
+                  <button
+                    type="button"
+                    disabled={savingSeasonal}
+                    className={`admin-seasonal-btn ${(seasonalConfig?.mode || 'auto') === 'auto' ? 'active' : ''}`}
+                    onClick={() => handleSeasonalModeChange('auto')}
+                  >
+                    ✨ Automático (hasta 31 dic)
+                  </button>
+                  <button
+                    type="button"
+                    disabled={savingSeasonal}
+                    className={`admin-seasonal-btn ${seasonalConfig?.mode === 'enabled' ? 'active' : ''}`}
+                    onClick={() => handleSeasonalModeChange('enabled')}
+                  >
+                    🎄 Siempre encendido
+                  </button>
+                  <button
+                    type="button"
+                    disabled={savingSeasonal}
+                    className={`admin-seasonal-btn ${seasonalConfig?.mode === 'disabled' ? 'active' : ''}`}
+                    onClick={() => handleSeasonalModeChange('disabled')}
+                  >
+                    Apagado (Clásico)
+                  </button>
+                </div>
+                <a
+                  href="/mis-redes"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="admin-seasonal-preview-link"
+                >
+                  Ver /mis-redes ↗
+                </a>
+              </div>
             </div>
 
             <div className="admin-citas-section">
