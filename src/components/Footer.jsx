@@ -1,11 +1,13 @@
 import { toCloudinaryUrl } from "../api/cloudinary";
+import { useSeasonalTheme } from "../context/SeasonalThemeContext";
 import { trackNavClick, trackWhatsAppClick } from "../utils/gtm";
 
 export default function Footer() {
+	const { isFestive } = useSeasonalTheme();
 	const year = new Date().getFullYear();
 
 	return (
-		<footer className="footer">
+		<footer className={`footer ${isFestive ? "footer-festive" : ""}`}>
 			<div className="container">
 				<div className="footer-grid">
 					<div>
@@ -102,6 +104,7 @@ export default function Footer() {
 					</div>
 				</div>
 				<div className="footer-bottom">
+					{isFestive && <span className="footer-festive-greeting">✨ Felices Fiestas · </span>}
 					© {year} Daniela Tapias Studio · Todos los derechos reservados
 				</div>
 			</div>

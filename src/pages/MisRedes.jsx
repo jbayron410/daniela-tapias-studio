@@ -1,11 +1,6 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toCloudinaryUrl } from '../api/cloudinary';
-import {
-  fetchSeasonalThemeConfig,
-  getCachedSeasonalTheme,
-  isChristmasThemeActive,
-} from '../api/gallery';
+import { useSeasonalTheme } from '../context/SeasonalThemeContext';
 import SEO from '../components/SEO';
 import { trackNavClick, trackWhatsAppClick, trackCtaClick } from '../utils/gtm';
 
@@ -130,21 +125,7 @@ const LINKS = [
 ];
 
 export default function MisRedes() {
-  const [seasonalConfig, setSeasonalConfig] = useState(() => getCachedSeasonalTheme());
-
-  useEffect(() => {
-    let isMounted = true;
-    fetchSeasonalThemeConfig().then((config) => {
-      if (isMounted && config) {
-        setSeasonalConfig(config);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  const isFestive = isChristmasThemeActive(seasonalConfig);
+  const { isFestive } = useSeasonalTheme();
 
   return (
     <div className={`linktree ${isFestive ? 'linktree-festive' : ''}`}>

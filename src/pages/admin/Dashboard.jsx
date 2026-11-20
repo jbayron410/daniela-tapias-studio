@@ -1,12 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchCitas, confirmCita, markCitaConfirmed, cancelCita } from '../../api/sheets';
 import { getBlocks } from '../../api/n8n';
-import {
-  fetchSeasonalThemeConfig,
-  updateSeasonalThemeMode,
-  isChristmasThemeActive,
-  getCachedSeasonalTheme,
-} from '../../api/gallery';
+import { updateSeasonalThemeMode } from '../../api/gallery';
+import { useSeasonalTheme } from '../../context/SeasonalThemeContext';
 import DashboardHeader from '../../components/admin/DashboardHeader';
 import StatsCards from '../../components/admin/StatsCards';
 import FilterBar from '../../components/admin/FilterBar';
@@ -40,18 +36,12 @@ export default function Dashboard() {
   const [showBlockDay, setShowBlockDay] = useState(false);
   const [editingCita, setEditingCita] = useState(null);
   const [bloqueos, setBloqueos] = useState([]);
-  const [seasonalConfig, setSeasonalConfig] = useState(() => getCachedSeasonalTheme());
+  const {
+    seasonalConfig,
+    isFestive: isFestiveActiveNow,
+    setSeasonalConfig,
+  } = useSeasonalTheme();
   const [savingSeasonal, setSavingSeasonal] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-    fetchSeasonalThemeConfig().then((config) => {
-      if (isMounted) setSeasonalConfig(config);
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   const handleSeasonalModeChange = useCallback(async (newMode) => {
     setSavingSeasonal(true);
@@ -63,9 +53,7 @@ export default function Dashboard() {
     } finally {
       setSavingSeasonal(false);
     }
-  }, []);
-
-  const isFestiveActiveNow = isChristmasThemeActive(seasonalConfig);
+  }, [setSeasonalConfig]);
 
   const loadCitas = useCallback(async () => {
     setLoading(true);
@@ -249,13 +237,13 @@ export default function Dashboard() {
               <div className="admin-seasonal-info">
                 <div className="admin-seasonal-title-row">
                   <span className="admin-seasonal-icon">🎄</span>
-                  <h3>Diseño Navideño en /mis-redes</h3>
+                  <h3>Diseño Navideño del Sitio Web</h3>
                   <span className={`admin-seasonal-status ${isFestiveActiveNow ? 'is-active' : 'is-inactive'}`}>
                     {isFestiveActiveNow ? 'Activo ahora' : 'Diseño clásico'}
                   </span>
                 </div>
                 <p className="admin-seasonal-desc">
-                  En modo <strong>Automático</strong> se desactivará solo el <strong>31 de diciembre de 2026 a las 11:59 p.m.</strong> sin que tengas que tocar nada el 1 de enero.
+                  Controla el tema navideño en <strong>toda la página</strong> (Inicio, /agendar, /tocados y /mis-redes). En modo <strong>Automático</strong> se apaga solo el <strong>31 de diciembre de 2026 a las 11:59 p.m.</strong>
                 </p>
               </div>
               <div className="admin-seasonal-controls">
@@ -285,14 +273,24 @@ export default function Dashboard() {
                     Apagado (Clásico)
                   </button>
                 </div>
-                <a
-                  href="/mis-redes"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="admin-seasonal-preview-link"
-                >
-                  Ver /mis-redes ↗
-                </a>
+                <div className="admin-seasonal-preview-links">
+                  <a
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-seasonal-preview-link"
+                  >
+                    Ver Inicio ↗
+                  </a>
+                  <a
+                    href="/mis-redes"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="admin-seasonal-preview-link"
+                  >
+                    Ver /mis-redes ↗
+                  </a>
+                </div>
               </div>
             </div>
 

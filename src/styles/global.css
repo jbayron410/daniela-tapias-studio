@@ -2621,3 +2621,269 @@ button {
     padding: 14px 16px;
   }
 }
+
+/* ============ Global Christmas Seasonal Theme (Site-Wide) ============ */
+body.festive-theme .navbar {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+body.festive-theme .navbar.scrolled {
+  background: rgba(255, 253, 249, 0.96);
+  border-bottom-color: rgba(212, 175, 55, 0.45);
+}
+
+body.festive-theme .nav-links a:hover {
+  color: #7c1626;
+}
+
+body.festive-theme .nav-links a::after {
+  background: #d4af37;
+}
+
+body.festive-theme .nav-cta {
+  background: linear-gradient(135deg, #7c1626 0%, #590f1b 100%);
+  color: #ffffff !important;
+  border: 1.5px solid #d4af37;
+  box-shadow: 0 4px 14px rgba(124, 22, 38, 0.22);
+}
+
+body.festive-theme .nav-cta:hover {
+  background: linear-gradient(135deg, #8f1a2c 0%, #6b1220 100%);
+  color: #ffffff !important;
+  border-color: #f0cb54;
+}
+
+/* Global festive buttons & section tags */
+body.festive-theme .btn-primary {
+  background: linear-gradient(135deg, #7c1626 0%, #590f1b 100%);
+  color: #ffffff;
+  border: 1.5px solid #d4af37;
+  box-shadow: 0 6px 20px rgba(124, 22, 38, 0.22);
+}
+
+body.festive-theme .btn-primary:hover {
+  background: linear-gradient(135deg, #8f1a2c 0%, #6b1220 100%);
+  color: #ffffff;
+  border-color: #f0cb54;
+  box-shadow: 0 8px 24px rgba(124, 22, 38, 0.3);
+}
+
+body.festive-theme .btn-outline {
+  border-color: #7c1626;
+  color: #7c1626;
+}
+
+body.festive-theme .btn-outline:hover {
+  background: #7c1626;
+  color: #ffffff;
+  border-color: #7c1626;
+}
+
+body.festive-theme .section-tag {
+  background: #faf6ec;
+  color: #7c1626;
+  border: 1px solid rgba(212, 175, 55, 0.45);
+  padding: 5px 14px;
+  border-radius: 50px;
+}
+
+body.festive-theme .section-alt {
+  background: #faf7f2;
+}
+
+body.festive-theme .booking-section,
+body.festive-theme .standalone-booking-festive {
+  background: linear-gradient(155deg, #ffffff 0%, #faf7f2 55%, #efe7db 100%);
+}
+
+/* Hero festive styling */
+.hero-festive {
+  background: linear-gradient(155deg, #ffffff 0%, #faf7f2 52%, #efe7db 100%);
+}
+
+.hero-badge-festive {
+  background: #7c1626;
+  color: #ffffff;
+  border: 1px solid rgba(212, 175, 55, 0.65);
+  box-shadow: 0 4px 14px rgba(124, 22, 38, 0.2);
+  letter-spacing: 1.2px;
+}
+
+.hero-festive h1 .highlight {
+  color: #7c1626;
+}
+
+.hero-festive .hero-social-proof .stat h3 {
+  color: #7c1626;
+}
+
+.hero-festive-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 480px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #faf6ec 0%, #f5ebd6 100%);
+  border: 1.5px solid rgba(212, 175, 55, 0.5);
+  border-left: 5px solid #7c1626;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(184, 134, 11, 0.08);
+}
+
+.hero-festive-notice-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #7c1626;
+  border: 1.5px solid #d4af37;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(124, 22, 38, 0.2);
+}
+
+.hero-festive-notice-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.82rem;
+  color: #3d3d3d;
+  line-height: 1.35;
+}
+
+.hero-festive-notice-body strong {
+  color: #7c1626;
+  font-family: var(--font-serif);
+  font-size: 0.94rem;
+}
+
+.hero-festive-notice-body a {
+  color: #7c1626;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.hero-media-frame-festive {
+  background: linear-gradient(160deg, #ffffff 0%, #faf5ea 48%, #ede3d2 100%);
+  border: 2px solid rgba(212, 175, 55, 0.5);
+  box-shadow: 0 18px 44px rgba(124, 22, 38, 0.12);
+}
+
+.hero-media-card-festive {
+  border: 1.5px solid rgba(212, 175, 55, 0.55);
+  border-left: 4px solid #7c1626;
+  opacity: 0.96;
+}
+
+.hero-media-card-festive h4 {
+  color: #7c1626;
+}
+
+/* Subtle festive accents for Gallery, Services, About & Booking */
+body.festive-theme .gallery-tab.active,
+body.festive-theme .gallery-tab:hover {
+  background: #7c1626;
+  color: #ffffff;
+  border-color: #7c1626;
+}
+
+body.festive-theme .service-card {
+  border: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+body.festive-theme .service-card:hover {
+  border-color: rgba(212, 175, 55, 0.65);
+  box-shadow: 0 12px 32px rgba(124, 22, 38, 0.1);
+}
+
+body.festive-theme .service-badge,
+body.festive-theme .service-card .price {
+  color: #7c1626;
+}
+
+body.festive-theme .about-studio-floating-card,
+body.festive-theme .about-feature {
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+body.festive-theme .about-feature:hover .about-feature-icon {
+  background: linear-gradient(135deg, #7c1626, #590f1b);
+  color: #ffffff;
+}
+
+body.festive-theme .perk-bullet {
+  color: #7c1626;
+}
+
+body.festive-theme .booking-form,
+body.festive-theme .booking-info {
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+body.festive-theme .step-num {
+  background: #7c1626;
+  color: #ffffff;
+}
+
+body.festive-theme .service-option.selected {
+  border-color: #7c1626;
+  background: #faf6ec;
+  color: #7c1626;
+}
+
+/* Standalone /agendar festive banner */
+.whatsapp-cta-banner-festive {
+  background: linear-gradient(135deg, #7c1626 0%, #590f1b 100%);
+  border-bottom: 2px solid #d4af37;
+}
+
+.whatsapp-cta-banner-festive .btn-whatsapp-cta {
+  color: #7c1626;
+}
+
+body.festive-theme .standalone-header {
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35);
+}
+
+body.festive-theme .standalone-logo {
+  color: #7c1626;
+}
+
+/* Footer festive styling */
+.footer-festive {
+  border-top: 3px solid rgba(212, 175, 55, 0.65);
+}
+
+.footer-festive-greeting {
+  color: #f5d76e;
+  font-weight: 600;
+}
+
+/* Headpieces (/tocados) festive touches */
+body.festive-theme .headpieces-hero {
+  background: linear-gradient(155deg, #ffffff 0%, #faf7f2 55%, #efe7db 100%);
+}
+
+body.festive-theme .headpiece-filter-btn.active {
+  background: #7c1626;
+  color: #ffffff;
+  border-color: #7c1626;
+}
+
+body.festive-theme .headpiece-card {
+  border-color: rgba(212, 175, 55, 0.32);
+}
+
+@media (max-width: 768px) {
+  .hero-festive-notice {
+    max-width: 100%;
+  }
+
+  .hero-festive .hero-media {
+    margin-top: 36px;
+  }
+}

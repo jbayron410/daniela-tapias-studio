@@ -2165,7 +2165,12 @@
     flex-direction: column;
   }
 
+  .admin-seasonal-preview-links {
+    width: 100%;
+  }
+
   .admin-seasonal-preview-link {
+    flex: 1;
     text-align: center;
   }
 }
@@ -2283,6 +2288,13 @@
 .admin-seasonal-btn:disabled {
   opacity: 0.6;
   cursor: wait;
+}
+
+.admin-seasonal-preview-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .admin-seasonal-preview-link {

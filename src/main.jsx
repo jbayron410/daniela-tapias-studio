@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import App from './App';
 import GtmRouteTracker from './components/GtmRouteTracker';
+import { SeasonalThemeProvider } from './context/SeasonalThemeContext';
 import './styles/global.css';
 
 const Agendar = React.lazy(() => import('./pages/Agendar'));
@@ -15,17 +16,19 @@ createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <HelmetProvider>
       <BrowserRouter>
-        <GtmRouteTracker />
-        <Suspense fallback={null}>
-          <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="/agendar" element={<Agendar />} />
-            <Route path="/mis-redes" element={<MisRedes />} />
-            <Route path="/tocados" element={<Tocados />} />
-            <Route path="/tocados/:slug" element={<Tocados />} />
-            <Route path="/admin/*" element={<AdminRoutes />} />
-          </Routes>
-        </Suspense>
+        <SeasonalThemeProvider>
+          <GtmRouteTracker />
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<App />} />
+              <Route path="/agendar" element={<Agendar />} />
+              <Route path="/mis-redes" element={<MisRedes />} />
+              <Route path="/tocados" element={<Tocados />} />
+              <Route path="/tocados/:slug" element={<Tocados />} />
+              <Route path="/admin/*" element={<AdminRoutes />} />
+            </Routes>
+          </Suspense>
+        </SeasonalThemeProvider>
       </BrowserRouter>
     </HelmetProvider>
   </React.StrictMode>

@@ -1,11 +1,14 @@
 import BookingForm from '../components/BookingForm';
 import { toCloudinaryUrl } from '../api/cloudinary';
+import { useSeasonalTheme } from '../context/SeasonalThemeContext';
 import SEO from '../components/SEO';
 import { trackWhatsAppClick, trackNavClick } from '../utils/gtm';
 
 export default function Agendar() {
+  const { isFestive } = useSeasonalTheme();
+
   return (
-    <div className="standalone-booking">
+    <div className={`standalone-booking ${isFestive ? 'standalone-booking-festive' : ''}`}>
       <SEO
         title="Agendar Cita"
         description="Agenda tu cita de peinados profesionales en Cartago, Valle del Cauca. Novias, quinceañeras y eventos sociales. Reserva en línea."
@@ -28,12 +31,20 @@ export default function Agendar() {
         </a>
       </header>
 
-      <div className="whatsapp-cta-banner">
+      <div className={`whatsapp-cta-banner ${isFestive ? 'whatsapp-cta-banner-festive' : ''}`}>
         <div className="container">
           <div className="whatsapp-cta-content">
             <div className="whatsapp-cta-text">
-              <h2>¿Prefieres agendar directamente?</h2>
-              <p>Escríbeme por WhatsApp y coordinamos tu cita al instante.</p>
+              <h2>
+                {isFestive
+                  ? '🎄 ¿Quieres agendar para el 24 o 31 de diciembre?'
+                  : '¿Prefieres agendar directamente?'}
+              </h2>
+              <p>
+                {isFestive
+                  ? 'Las citas del 24 y 31 de diciembre tienen cupos limitados y se reservan exclusivamente por WhatsApp (50% de anticipo · horario fijo).'
+                  : 'Escríbeme por WhatsApp y coordinamos tu cita al instante.'}
+              </p>
             </div>
             <a
               href="https://wa.me/573216646983?text=Hola%20Daniela%2C%20quiero%20agendar%20una%20cita"
