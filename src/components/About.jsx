@@ -98,6 +98,9 @@ export default function About({ onBook }) {
 							<span className="studio-perk">
 								<span className="perk-bullet">✓</span> Citas 100% personalizadas
 							</span>
+							<span className="studio-perk">
+								<span className="perk-bullet">✓</span> Ambiente climatizado
+							</span>
 						</div>
 					</div>
 
